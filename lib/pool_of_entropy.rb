@@ -1,5 +1,6 @@
 require "pool_of_entropy/version"
+require "pool_of_entropy/core_prng"
 
-module PoolOfEntropy
+class PoolOfEntropy
   # Your code goes here...
 end

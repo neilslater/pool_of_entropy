@@ -61,7 +61,7 @@ Influence all random numbers until change mind (but do not alter internal state)
 
 Alter internal state of pool (aka customise or "collect entropy"):
 
-    pool.add_state( 'Purple is my favourite colour.' )
+    pool.update_state( 'Purple is my favourite colour.' )
 
 ## Rationale
 

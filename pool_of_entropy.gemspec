@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.version       = PoolOfEntropy::VERSION
   spec.authors       = ["Neil Slater"]
   spec.email         = ["slobo777@gmail.com"]
-  spec.summary       = %q{Random number generator with features for gamers.}
+  spec.summary       = %q{Random number generator with extra features for gamers.}
   spec.description   = %q{PoolOfEntropy is a PRNG based on cryptographic secure PRNGs, intended to bring back the feeling of 'personal luck' that some gamers feel when rolling their own dice.}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/neilslater/pool_of_entropy"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
@@ -20,4 +20,5 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "bundler", "~> 1.5"
   spec.add_development_dependency "rake"
+  spec.add_development_dependency "rspec"
 end
