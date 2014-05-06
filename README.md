@@ -125,8 +125,8 @@ player in a dice game, it counts just fine.
 By default PoolOfEntropy objects start off with some machine-collected entropy from SecureRandom
 to avoid trivial attacks (of always using the dice in the exact same way). You could view this
 as representing the environment or the die itself (all the scratches and imperfections that
-you cannot control). Or, under an honour system of not repeating yourself you can switch off
-that default.
+you cannot control, and have no influence over). Or, under an honour system of not repeating
+yourself you can switch off that default.
 
 ## Contributing
 
