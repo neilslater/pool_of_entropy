@@ -121,22 +121,35 @@ describe PoolOfEntropy::CorePRNG do
       end
     end
 
+    instance01 = PoolOfEntropy::CorePRNG.new
+    instance01.update( 'QWertyuiopp' )
+    instance01.update( 'Asdfghjkjl' )
+    instance01.update( 'Zxcvbnm' )
+
     pool_types = [
       [
-        'default params',
+        'default instance',
         PoolOfEntropy::CorePRNG.new
       ],
       [
-        'size of 20',
-        PoolOfEntropy::CorePRNG.new( 20 )
+        'instance with 2KB pool size',
+        PoolOfEntropy::CorePRNG.new( 32 )
       ],
       [
-        'zeroed state',
+        'instance with initial state all 0',
         PoolOfEntropy::CorePRNG.new( 1, "\x0" * 64 )
       ],
       [
-        'five blocks fixed state and initial mix block 3',
+        'instance with fixed initial state',
         PoolOfEntropy::CorePRNG.new( 5, "fiver" * 64, 3 )
+      ],
+      [
+        'instance cloned from 2KB instance',
+        PoolOfEntropy::CorePRNG.new( 32 ).clone
+      ],
+      [
+        'instance that has been updated with user data',
+        instance01
       ],
     ]
 
@@ -153,6 +166,186 @@ describe PoolOfEntropy::CorePRNG do
 
           it "has a high probability of returning a different string each time" do
             Set[ *(1..100).map {prng.read_bytes} ].size.should == 100
+          end
+
+          describe "with adjustments" do
+            it "always returns a 16 byte string" do
+              100.times { prng.read_bytes('654321').length.should == 16 }
+            end
+
+            it "has a high probability of returning a different string each time" do
+              Set[ *(1..100).map {prng.read_bytes('654321')} ].size.should == 100
+            end
+
+            it "changes output, but does not include adjustments in changes to state" do
+              prng_copy = prng.clone
+              10.times do
+                prng.read_bytes('Hello!').should == prng_copy.read_bytes('Hello!')
+                prng.state.should == prng_copy.state
+                prng.read_bytes('Hello!').should_not == prng_copy.read_bytes('Goodbye!')
+                prng.state.should == prng_copy.state
+                prng.read_bytes.should_not == prng_copy.read_bytes('Goodbye!')
+                prng.state.should == prng_copy.state
+                prng.read_bytes('Hello!').should_not == prng_copy.read_bytes
+                prng.state.should == prng_copy.state
+                prng.read_bytes('Hello','Goodbye').should_not == prng_copy.read_bytes
+                prng.state.should == prng_copy.state
+                # Verify that output remains same for next rolls
+                prng.read_bytes('Foobar','Wibble').should == prng_copy.read_bytes('Foobar','Wibble')
+                prng.state.should == prng_copy.state
+                prng.read_bytes.should == prng_copy.read_bytes
+                prng.state.should == prng_copy.state
+              end
+            end
+          end
+        end
+
+        describe "#read_hex" do
+          it "always returns a 32 digit hex string" do
+            100.times do
+              hex = prng.read_hex
+              hex.length.should == 32
+              hex.should match /\A[0-9a-f]{32}\z/
+            end
+          end
+
+          it "has a high probability of returning a different string each time" do
+            Set[ *(1..100).map {prng.read_hex} ].size.should == 100
+          end
+
+          describe "with adjustments" do
+            it "always returns a 32 digit hex string" do
+              100.times do
+                hex = prng.read_hex('QWertyeu')
+                hex.length.should == 32
+                hex.should match /\A[0-9a-f]{32}\z/
+              end
+            end
+
+            it "has a high probability of returning a different string each time" do
+              Set[ *(1..100).map {prng.read_hex('654321')} ].size.should == 100
+            end
+
+            it "changes output, but does not include adjustments in changes to state" do
+              prng_copy = prng.clone
+              10.times do
+                prng.read_hex('Hello!').should == prng_copy.read_hex('Hello!')
+                prng.state.should == prng_copy.state
+                prng.read_hex('Hello!').should_not == prng_copy.read_hex('Goodbye!')
+                prng.state.should == prng_copy.state
+                prng.read_hex.should_not == prng_copy.read_hex('Goodbye!')
+                prng.state.should == prng_copy.state
+                prng.read_hex('Hello!').should_not == prng_copy.read_hex
+                prng.state.should == prng_copy.state
+                prng.read_hex('Hello','Goodbye').should_not == prng_copy.read_hex
+                prng.state.should == prng_copy.state
+                # Verify that output remains same for next rolls
+                prng.read_hex('Foobar','Wibble').should == prng_copy.read_hex('Foobar','Wibble')
+                prng.state.should == prng_copy.state
+                prng.read_hex.should == prng_copy.read_hex
+                prng.state.should == prng_copy.state
+              end
+            end
+          end
+        end
+
+        describe "#read_bignum" do
+          it "always returns a 128-bit unsigned integer" do
+            100.times do
+              num = prng.read_bignum
+              num.should >= 0
+              num.should < 2**128
+            end
+          end
+
+          it "has a high probability of returning a different number each time" do
+            Set[ *(1..100).map {prng.read_bignum} ].size.should == 100
+          end
+
+          describe "with adjustments" do
+            it "always returns a 128-bit unsigned integer" do
+              100.times do
+                num = prng.read_bignum( 'Biggest' )
+                num.should >= 0
+                num.should < 2**128
+              end
+            end
+
+            it "has a high probability of returning a different number each time" do
+              Set[ *(1..100).map {prng.read_bignum('654321')} ].size.should == 100
+            end
+
+            it "changes output, but does not include adjustments in changes to state" do
+              prng_copy = prng.clone
+              10.times do
+                prng.read_bignum('Hello!').should == prng_copy.read_bignum('Hello!')
+                prng.state.should == prng_copy.state
+                prng.read_bignum('Hello!').should_not == prng_copy.read_bignum('Goodbye!')
+                prng.state.should == prng_copy.state
+                prng.read_bignum.should_not == prng_copy.read_bignum('Goodbye!')
+                prng.state.should == prng_copy.state
+                prng.read_bignum('Hello!').should_not == prng_copy.read_bignum
+                prng.state.should == prng_copy.state
+                prng.read_bignum('Hello','Goodbye').should_not == prng_copy.read_bignum
+                prng.state.should == prng_copy.state
+                # Verify that output remains same for next rolls
+                prng.read_bignum('Foobar','Wibble').should == prng_copy.read_bignum('Foobar','Wibble')
+                prng.state.should == prng_copy.state
+                prng.read_bignum.should == prng_copy.read_bignum
+                prng.state.should == prng_copy.state
+              end
+            end
+          end
+        end
+
+        describe "#read_float" do
+          it "always returns a Float between 0.0 (inclusive) and 1.0 (exclusive)" do
+            100.times do
+              num = prng.read_float
+              num.should be_a Float
+              num.should >= 0.0
+              num.should < 1.0
+            end
+          end
+
+          it "has a high probability of returning a different Float each time" do
+            Set[ *(1..100).map {prng.read_float} ].size.should == 100
+          end
+
+          describe "with adjustments" do
+            it "always returns a Float between 0.0 (inclusive) and 1.0 (exclusive)" do
+              100.times do
+              num = prng.read_float('Boom')
+              num.should be_a Float
+              num.should >= 0.0
+              num.should < 1.0
+              end
+            end
+
+            it "has a high probability of returning a different Float each time" do
+              Set[ *(1..100).map {prng.read_float('654321')} ].size.should == 100
+            end
+
+            it "changes output, but does not include adjustments in changes to state" do
+              prng_copy = prng.clone
+              10.times do
+                prng.read_float('Hello!').should == prng_copy.read_float('Hello!')
+                prng.state.should == prng_copy.state
+                prng.read_float('Hello!').should_not == prng_copy.read_float('Goodbye!')
+                prng.state.should == prng_copy.state
+                prng.read_float.should_not == prng_copy.read_float('Goodbye!')
+                prng.state.should == prng_copy.state
+                prng.read_float('Hello!').should_not == prng_copy.read_float
+                prng.state.should == prng_copy.state
+                prng.read_float('Hello','Goodbye').should_not == prng_copy.read_float
+                prng.state.should == prng_copy.state
+                # Verify that output remains same for next rolls
+                prng.read_float('Foobar','Wibble').should == prng_copy.read_float('Foobar','Wibble')
+                prng.state.should == prng_copy.state
+                prng.read_float.should == prng_copy.read_float
+                prng.state.should == prng_copy.state
+              end
+            end
           end
         end
 
