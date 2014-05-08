@@ -21,6 +21,8 @@ require 'securerandom'
 #  # E.g. => 33857278877368906880463811096418580004
 #  prng.read_float
 #  # E.g. => 0.6619838265836278
+#  prng.generate_integer( 20 )
+#  # E.g. => 7
 #
 
 class PoolOfEntropy::CorePRNG
@@ -115,6 +117,31 @@ class PoolOfEntropy::CorePRNG
   def read_float *adjustments
     num = read_bytes( *adjustments ).unpack('Q>*').first >> 11
     num.to_f / 2 ** 53
+  end
+
+  # Statistically flat distribution from range (0...top).
+  # If necessary, it will read more data to ensure absolute fairness. This method
+  # can generate an unbiased distribution of Bignums up to roughly half the maximum bit size
+  # allowed by Ruby (i.e. much larger than 2**128 generated in a single read)
+  # @param [Fixnum,Bignum] top upper bound of distribution, not inclusive
+  # @param [Array<String>] adjustments mixed in using SHA-512, so that they affect return value, but not internal state
+  # @return [Fixnum,Bignum] between 0 and top-1 inclusive
+  def generate_integer top, *adjustments
+    power = 1
+    sum = 0
+    lower_bound = 0
+    words = []
+
+    loop do
+      words = read_bytes( *adjustments ).unpack('L>*') if words.empty?
+      sum = 2**32 * sum + words.shift
+      power *= 2**32
+      lower_bound = sum * top / power
+      upper_bound = ( (sum + 1) * top ) / power
+      break if lower_bound == upper_bound
+    end
+
+    lower_bound
   end
 
   private
