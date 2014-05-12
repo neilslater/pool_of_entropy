@@ -65,6 +65,8 @@ Alter internal state of pool (aka customise or "collect entropy"):
 
 ## Rationale
 
+### Properties of Software Random Numbers
+
 Software PRNGs available are designed to produce data that cannot be statistically separated
 from an ideal unbiased "truly random" source. There are quite a few algorithms that can do that,
 with differing degrees of success. Current best-in-class generators are pretty good at creating
@@ -77,6 +79,8 @@ needs to be true, you can use a Crytogaphically Secure PRNG (CSPRNG). Ruby's Sec
 be predicted from outside the system. Part of how CSPRNGs achieve unpredicatbility is by collecting
 entropy from sources within the computer - this might be timing of events from network cards and
 keyboard presses, or by sampling from deliberately noisy circuits.
+
+### Properties of Dice
 
 A humble 6-sided die achieves similar statistics and unpredictability, but in a different way.
 Unbiased statistical randomness is achieved by making the shape and density as regular as possible.
@@ -93,6 +97,8 @@ by your nerves, bones and muscles. This gives many people a feeling of agency an
 to the end result. It may just be a random number, but in some sense it is *your random
 number because you generated it*.
 
+### Normal PRNGs Used To Simulate Dice
+
 When it comes to finding computer-based sources of randomness, you will find many systems
 that excel at producing results that are statistically random. Ruby's rand() is already
 very good at that. Computer-based PRNGs can apparently be made closer to ideal unbiased
@@ -101,12 +107,15 @@ randomness than physical dice (or at least beyond any realistic ability to measu
 Truly unpredictable sources are also easy enough to find. They make themselves unpredictable
 by collecting entropy from sources on the machines where they run, that no-one can predict.
 
-However, there has been a cost to the user's perceived agency. If I was playing a game
+However, there has been a cost to the user's agency. If I was playing a game
 using one of these sources, even though it was fair in the sense that the outcomes could
 well be the same, it gives me the same feeling as if another player was rolling all the dice.
 In a role-playing game, it feels the same as if the DM was rolling all the dice. Now sometimes
 and for some (many/most?) people that's OK. But other times, part of the fun is in rolling
-the dice. I would be happy rolling computer dice, but only if somehow it was "me" rolling them.
+the dice yourself. I would be happy rolling computer dice, but only if somehow it was
+"me" rolling them.
+
+### What PoolOfEntropy Attempts To Do
 
 That is the mission of this gem: To create a simple PRNG where the results are connected as much
 as possible to the end user. This has to be achieved without compromising the
@@ -114,7 +123,7 @@ good features of fairness and unpredictability that PRNGs and CSPRNGs have in ge
 
 Luckily this can be achieved using an approach that many CSPRNGs already use - using a
 data source to seed number generation. The main difference between PoolOfEntropy and
-regular CSPRNGs used to protect your computer on the internet is how "entropy" is sourced.
+regular CSPRNGs used to protect your computer on the internet is how this "entropy" is sourced.
 In a secure system, entropy is sourced from multiple places - anywhere that data can be
 gathered that an imagined attacker will have a hard time guessing the value. In PoolOfEntropy
 this is subverted - the end user supplies any data they like, and the gem treats it

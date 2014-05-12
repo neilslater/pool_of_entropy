@@ -3,15 +3,34 @@
 See http://www.phy.duke.edu/~rgb/General/dieharder.php for details about
 the dieharder utility.
 
-Date run: 9 May 2014
+The test consumes a large amount of data, several orders of magnitude
+more than the target use of PoolOfEntropy. It is a thorough test
+for hidden bias, short cycles and patterns that may occur as faults
+in "weak" PRNGs. No test of randomness can be 100% certain though.
 
-Command used:
+The test PASS received implies PoolOfEntropy is free from a variety
+of detectable faults that would prevent it being used as a source of
+statistically random numbers. Not all PRNGs pass these tests -
+for instance, C's standard library rand() fails most of them.
+All modern cryptographic PRNGs should be expected to pass,
+as should Ruby's built-in rand() - an implementation of the Mersenne
+Twister algorithm.
+
+## Date run: 9 May 2014
+
+Completing all the tests took roughly 3 days.
+
+## Command used
+
+PoolOfEntropy::CorePRNG was used in its default, simplest state to
+create a continuous stream of pseudo-random bytes, and this was
+fed into the dieharder test running the "all tests" option:
 
     ruby -rpool_of_entropy -e \
       'r=PoolOfEntropy::CorePRNG.new;loop do;print r.read_bytes;end' \
       | dieharder -g 200 -a
 
-Report from dieharder:
+## Report from dieharder
 
     #=============================================================================#
     #            dieharder version 3.31.1 Copyright 2003 Robert G. Brown          #
@@ -113,3 +132,16 @@ Report from dieharder:
           rgb_lagged_sum|  16|   1000000|     100|0.14037461|  PASSED
           rgb_lagged_sum|  17|   1000000|     100|0.42891060|  PASSED
           rgb_lagged_sum|  18|   1000000|     100|0.01741981|  PASSED
+          rgb_lagged_sum|  19|   1000000|     100|0.01825942|  PASSED
+          rgb_lagged_sum|  20|   1000000|     100|0.82574915|  PASSED
+          rgb_lagged_sum|  21|   1000000|     100|0.55886738|  PASSED
+          rgb_lagged_sum|  22|   1000000|     100|0.96301438|  PASSED
+          rgb_lagged_sum|  23|   1000000|     100|0.35504422|  PASSED
+          rgb_lagged_sum|  24|   1000000|     100|0.86742325|  PASSED
+          rgb_lagged_sum|  25|   1000000|     100|0.97050104|  PASSED
+          rgb_lagged_sum|  26|   1000000|     100|0.45785583|  PASSED
+          rgb_lagged_sum|  27|   1000000|     100|0.91905828|  PASSED
+          rgb_lagged_sum|  28|   1000000|     100|0.53348048|  PASSED
+          rgb_lagged_sum|  29|   1000000|     100|0.19985210|  PASSED
+          rgb_lagged_sum|  30|   1000000|     100|0.63540309|  PASSED
+          rgb_lagged_sum|  31|   1000000|     100|0.88671466|  PASSED
