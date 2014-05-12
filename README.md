@@ -1,5 +1,7 @@
 # PoolOfEntropy
 
+[![Build Status](https://travis-ci.org/neilslater/pool_of_entropy.png?branch=master)](http://travis-ci.org/neilslater/pool_of_entropy)
+
 PoolOfEntropy is a pseudo random number generator (PRNG) based on secure hashes,
 intended to bring back the feeling of 'personal luck' that some gamers may feel when rolling
 their *own* dice. An instance of the PoolOfEntropy class could be assigned to a player, or
