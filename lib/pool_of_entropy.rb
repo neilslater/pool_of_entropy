@@ -13,7 +13,7 @@ require "pool_of_entropy/core_prng"
 #  # E.g. => 12
 #
 # @example A customised PRNG, seeded with some user data, using webcam for "true" randomness
-#  prng = PoolOfEntropy.new :size => 4, :blank => true, :seeds = ['Hello!',picture_bytes]
+#  prng = PoolOfEntropy.new :size => 4, :blank => true, :seeds = [ 'My Name' ]
 #  loop do
 #    prng.add_to_pool( Webcam.image.bytes ) # Imagined Webcam interface
 #    prng.rand( 20 )
@@ -37,7 +37,7 @@ class PoolOfEntropy
 
     size = 1
     if options[:size]
-      size = Integer( size )
+      size = Integer( options[:size] )
       if size < 1 || size > 256
         raise ArgumentError, "Size of pool must be in Range 1..256, got #{size}"
       end
@@ -73,12 +73,13 @@ class PoolOfEntropy
   # Same functionality as Kernel#rand or Random#rand, but using
   # current pool state to generate number, and including zero, one or
   # two modifiers that are in effect.
-  # @param [Integer,Range] max use 0 to return
-  # @return [Fixnum,Bignum,Float] type depends on value of max
+  # @param [Integer,Range] max if 0 then will return a Float
+  # @return [Float,Fixnum,Bignum] type depends on value of max
   def rand max = 0
     if max.is_a? Range
-      bottom, top = max.minmax
-      return nil if top < bottom
+      bottom = max.first
+      top = max.last
+      return( nil ) if top < bottom
       return bottom + generate_integer( ( top - bottom + 1 ) )
     else
       effective_max = max.to_i.abs
@@ -90,6 +91,13 @@ class PoolOfEntropy
     end
   end
 
+  # Stores the hash of one or more string modifiers that will be used
+  # just once each to modify results of calls to #rand. Temporary "next"
+  # modifiers and the "all" modifier are combined if both are in effect.
+  # Modifiers change the end result of a call to #rand(), but do *not*
+  # affect the internal state of the data pool used by the generator.
+  # @param [Array<String>] modifiers
+  # @return [PoolOfEntropy] self
   def modify_next *modifiers
     modifiers.each do |modifier|
       if modifier.nil?
@@ -101,6 +109,14 @@ class PoolOfEntropy
     self
   end
 
+  # Stores the hash of a single string modifier that will be used
+  # to modify results of calls to #rand, until this modifier is
+  # reset. Temporary "next" modifiers and the "all" modifier are
+  # combined if both are in effect.  Modifiers change the end result
+  # of a call to #rand(), but do *not*
+  # affect the internal state of the data pool used by the generator.
+  # @param [String,nil] modifier
+  # @return [PoolOfEntropy] self
   def modify_all modifier
     @fixed_modifier = modifier
     unless @fixed_modifier.nil?
@@ -109,11 +125,18 @@ class PoolOfEntropy
     self
   end
 
+  # Changes the internal state of the data pool used by the generator,
+  # by "mixing in" user-supplied data. This affects all future values
+  # from #rand() and cannot be undone.
+  # @param [String] data
+  # @return [PoolOfEntropy] self
   def add_to_pool data
     @core_prng.update( data )
     self
   end
 
+  # Empties the "next" modifier queue and clears the "all" modifier.
+  # @return [PoolOfEntropy] self
   def clear_all_modifiers
     @next_modifier_queue = []
     @fixed_modifier = nil

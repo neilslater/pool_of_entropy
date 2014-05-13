@@ -154,7 +154,8 @@ describe PoolOfEntropy::CorePRNG do
     ]
 
     # NB "probabilty" and "randomness" tests in the following block are very light, just
-    # intended to capture high-level failures in logic.
+    # intended to capture high-level failures in logic. See DIEHARDER_TEST.md for thorough
+    # checks on statistical randomness of PoolOfEntropy::CorePRNG
     pool_types.each do |prng_name, prng|
 
       context "using #{prng_name}" do
