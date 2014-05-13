@@ -1,5 +1,4 @@
-require 'pool_of_entropy'
-require 'set'
+require 'spec_helper'
 
 describe PoolOfEntropy do
   describe "class methods" do

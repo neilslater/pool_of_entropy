@@ -1,6 +1,9 @@
 # PoolOfEntropy
-
+[![Gem Version](https://badge.fury.io/rb/pool_of_entropy.png)](http://badge.fury.io/rb/pool_of_entropy)
 [![Build Status](https://travis-ci.org/neilslater/pool_of_entropy.png?branch=master)](http://travis-ci.org/neilslater/pool_of_entropy)
+[![Coverage Status](https://coveralls.io/repos/neilslater/pool_of_entropy/badge.png?branch=master)](https://coveralls.io/r/neilslater/pool_of_entropy?branch=master)
+[![Code Climate](https://codeclimate.com/github/neilslater/pool_of_entropy.png)](https://codeclimate.com/github/neilslater/pool_of_entropy)
+[![Dependency Status](https://gemnasium.com/neilslater/pool_of_entropy.png)](https://gemnasium.com/neilslater/pool_of_entropy)
 
 PoolOfEntropy is a pseudo random number generator (PRNG) based on secure hashes,
 intended to bring back the feeling of 'personal luck' that some gamers may feel when rolling
