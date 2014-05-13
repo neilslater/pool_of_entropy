@@ -78,15 +78,19 @@ describe PoolOfEntropy do
       ],
       [
         'instance with default size, seeded',
-        PoolOfEntropy.new( :seeds => ['of change'] )
+        PoolOfEntropy.new( :blank => true, :seeds => ['of change'] )
       ],
       [
         'instance cloned from another instance',
         PoolOfEntropy.new( :size => 3 ).clone
-      ]
+      ],
+      [
+        'instance with maximum size, 16KB pool',
+        PoolOfEntropy.new( :size => 256, :blank => true, :seeds => ['dgeq','dsfsf','dsafsaf'] )
+      ],
     ]
 
-    # NB "probabilty" and "randomness" tests in the following block are very light, just
+    # NB "probability" and "randomness" tests in the following block are very light, just
     # intended to capture high-level failures in logic. See DIEHARDER_TEST.md for thorough
     # checks on statistical randomness of PoolOfEntropy::CorePRNG
     pool_types.each do |pool_name, pool|
@@ -149,7 +153,7 @@ describe PoolOfEntropy do
               end
             end
 
-            # This is a weak test of randomness, see DIEHARDER_TEST.md
+            # This is a very weak test of randomness, see DIEHARDER_TEST.md
             it "should select values without obvious bias" do
               Set[ *(1..200).map{ pool.rand( 20 ) } ].size.should == 20
             end
@@ -181,6 +185,174 @@ describe PoolOfEntropy do
               Set[ *(1..100).map{ pool.rand( 100000000000..200000000000 ) } ].size.should == 100
             end
 
+          end
+
+        end
+
+
+        describe "#modify_next" do
+          it "changes output value from next call to #rand" do
+            pool_copy = pool.clone
+            100.times do
+              modifier = SecureRandom.hex
+              pool_copy.modify_next( modifier ).rand.should_not == pool.rand
+            end
+          end
+
+          it "changes output value consistently" do
+            pool_copy = pool.clone
+            100.times do
+              modifier = SecureRandom.hex
+              pool_copy.modify_next( modifier ).rand.should == pool.modify_next( modifier ).rand
+            end
+          end
+
+          it "changes next output value but not future ones" do
+            pool_copy = pool.clone
+            100.times do
+              modifier = SecureRandom.hex
+              pool_copy.modify_next( modifier ).rand.should_not == pool.rand
+              pool_copy.rand.should == pool.rand
+            end
+          end
+
+          it "can create a 'queue' of modifiers, used in turn" do
+            pool_copy = pool.clone
+            10.times do
+              modifiers = (0..5).map { SecureRandom.hex }
+
+              # Syntax for all-at-once
+              pool_copy.modify_next( *modifiers )
+              modifiers.each do |modifier|
+                pool_copy.rand.should == pool.modify_next( modifier ).rand
+              end
+              # Assert we're back in sync without modifiers
+              pool_copy.rand.should == pool.rand
+
+              # Adding to queue one-at-a-time
+              modifiers.each do |modifier|
+                pool_copy.modify_next( modifier )
+              end
+              modifiers.each do |modifier|
+                pool_copy.rand.should == pool.modify_next( modifier ).rand
+              end
+              # Assert we're back in sync without modifiers
+              pool_copy.rand.should == pool.rand
+            end
+          end
+        end # modify_next
+
+        describe "#modify_all" do
+          it "changes output value from future calls to #rand" do
+            pool_copy = pool.clone
+            10.times do
+              modifier = SecureRandom.hex
+              pool_copy.modify_all( modifier ).rand.should_not == pool.rand
+              10.times do
+                pool_copy.rand.should_not == pool.rand
+              end
+            end
+          end
+
+          it "changes output value consistently" do
+            pool_copy = pool.clone
+            10.times do
+              modifier = SecureRandom.hex
+              pool_copy.modify_all( modifier ).rand.should == pool.modify_all( modifier ).rand
+              10.times do
+                pool_copy.rand.should == pool.rand
+              end
+            end
+          end
+
+          it "changes output value consistently with #modify_next" do
+            pool_copy = pool.clone
+            100.times do
+              modifier = SecureRandom.hex
+              pool_copy.modify_all( modifier ).rand.should == pool.modify_next( modifier ).rand
+            end
+          end
+
+          it "can be reset wih nil modifier" do
+            pool_copy = pool.clone
+            10.times do
+              modifier = SecureRandom.hex
+              pool_copy.modify_all( modifier ).rand.should_not == pool.rand
+              pool_copy.rand.should_not == pool.rand
+              pool_copy.modify_all( nil )
+              10.times do
+                pool_copy.rand.should == pool.rand
+              end
+            end
+          end
+
+        end
+
+        describe "#clear_all_modifiers" do
+
+          it "removes a queue of 'next' modifiers" do
+            pool_copy = pool.clone
+            10.times do
+              modifiers = (0..5).map { SecureRandom.hex }
+              pool_copy.modify_next( *modifiers )
+              pool_copy.rand.should_not == pool.rand
+              pool_copy.clear_all_modifiers
+              10.times do
+                pool_copy.rand.should == pool.rand
+              end
+            end
+          end
+
+          it "removes a current 'all' modifier" do
+            pool_copy = pool.clone
+            10.times do
+              modifier = SecureRandom.hex
+              pool_copy.modify_all( modifier ).rand.should_not == pool.rand
+              pool_copy.rand.should_not == pool.rand
+              pool_copy.clear_all_modifiers
+              10.times do
+                pool_copy.rand.should == pool.rand
+              end
+            end
+          end
+
+          it "removes both 'all' and 'next' modifiers in one go" do
+            pool_copy = pool.clone
+            10.times do
+              modifier = SecureRandom.hex
+              pool_copy.modify_next( *(0..5).map { SecureRandom.hex } )
+              pool_copy.modify_all( modifier ).rand.should_not == pool.rand
+              pool_copy.rand.should_not == pool.rand
+              pool_copy.clear_all_modifiers
+              10.times do
+                pool_copy.rand.should == pool.rand
+              end
+            end
+          end
+        end
+
+        describe "#add_to_pool" do
+
+          it "alters all future output values" do
+            pool_copy = pool.clone
+            pool_copy.add_to_pool( 'Some user data!' )
+            100.times do
+              pool_copy.rand.should_not == pool.rand
+            end
+          end
+
+          it "alters all future output values consistently" do
+            pool_copy = pool.clone
+
+            10.times do
+              user_data = SecureRandom.hex
+              pool_copy.add_to_pool( user_data )
+              pool.add_to_pool( user_data )
+
+              10.times do
+                pool_copy.rand.should == pool.rand
+              end
+            end
           end
 
         end

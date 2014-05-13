@@ -153,7 +153,7 @@ describe PoolOfEntropy::CorePRNG do
       ],
     ]
 
-    # NB "probabilty" and "randomness" tests in the following block are very light, just
+    # NB "probability" and "randomness" tests in the following block are very light, just
     # intended to capture high-level failures in logic. See DIEHARDER_TEST.md for thorough
     # checks on statistical randomness of PoolOfEntropy::CorePRNG
     pool_types.each do |prng_name, prng|
@@ -470,7 +470,7 @@ describe PoolOfEntropy::CorePRNG do
                 :hex   => prngs[1].read_hex,
                 :float => prngs[2].read_float,
                 :num   => prngs[3].read_bignum,
-                :int   => prngs[4].generate_integer( 1_000_000 ),
+                :int   => prngs[4].generate_integer( 1_000_000_000 ),
               ]
             end
             results.sort_by { |h| h[:int] }.should == results.sort_by { |h| h[:hex] }
