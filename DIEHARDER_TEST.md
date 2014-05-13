@@ -145,3 +145,11 @@ fed into the dieharder test running the "all tests" option:
           rgb_lagged_sum|  29|   1000000|     100|0.19985210|  PASSED
           rgb_lagged_sum|  30|   1000000|     100|0.63540309|  PASSED
           rgb_lagged_sum|  31|   1000000|     100|0.88671466|  PASSED
+         rgb_kstest_test|   0|     10000|    1000|0.94490633|  PASSED
+         dab_bytedistrib|   0|  51200000|       1|0.21636554|  PASSED
+                 dab_dct| 256|     50000|       1|0.35659461|  PASSED
+            dab_filltree|  32|  15000000|       1|0.49053255|  PASSED
+            dab_filltree|  32|  15000000|       1|0.24508716|  PASSED
+           dab_filltree2|   0|   5000000|       1|0.27633380|  PASSED
+           dab_filltree2|   1|   5000000|       1|0.93106328|  PASSED
+            dab_monobit2|  12|  65000000|       1|0.21748673|  PASSED
