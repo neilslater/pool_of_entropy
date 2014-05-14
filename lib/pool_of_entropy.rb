@@ -35,30 +35,13 @@ class PoolOfEntropy
       raise TypeError, "Expecting an options hash, got #{options.inspect}"
     end
 
-    size = 1
-    if options[:size]
-      size = Integer( options[:size] )
-      if size < 1 || size > 256
-        raise ArgumentError, "Size of pool must be in Range 1..256, got #{size}"
-      end
-    end
+    size = size_from_options( options )
 
-    initial_state = if options[:blank]
-      "\x0" * size * 64
-    else
-      SecureRandom.random_bytes( size * 64 )
-    end
+    initial_state = state_from_options( options, size )
 
     @core_prng = CorePRNG.new( size, initial_state )
 
-    if options[:seeds]
-      unless options[:seeds].is_a? Array
-        raise TypeError, "Expected value for :seeds to be an Array, got #{options[:seeds].inspect}"
-      end
-      options[:seeds].each do |seed|
-        add_to_pool( seed )
-      end
-    end
+    seed_from_options( options )
 
     @next_modifier_queue = []
     @fixed_modifier = nil
@@ -157,4 +140,33 @@ class PoolOfEntropy
     @core_prng.generate_integer( max, *use_adjustments )
   end
 
+  def state_from_options( options, size )
+    if options[:blank]
+      "\x0" * size * 64
+    else
+      SecureRandom.random_bytes( size * 64 )
+    end
+  end
+
+  def size_from_options( options )
+    size = 1
+    if options[:size]
+      size = Integer( options[:size] )
+      if size < 1 || size > 256
+        raise ArgumentError, "Size of pool must be in Range 1..256, got #{size}"
+      end
+    end
+    size
+  end
+
+  def seed_from_options( options )
+    if options[:seeds]
+      unless options[:seeds].is_a? Array
+        raise TypeError, "Expected value for :seeds to be an Array, got #{options[:seeds].inspect}"
+      end
+      options[:seeds].each do |seed|
+        add_to_pool( seed )
+      end
+    end
+  end
 end
