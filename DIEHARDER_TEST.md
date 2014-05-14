@@ -8,15 +8,28 @@ more than the target use of PoolOfEntropy. It is a thorough test
 for hidden bias, short cycles and patterns that may occur as faults
 in "weak" PRNGs. No test of randomness can be 100% certain though.
 
-The test PASS received implies PoolOfEntropy is free from a variety
-of detectable faults that would prevent it being used as a source of
-statistically random numbers. Not all PRNGs pass these tests -
-for instance, C's standard library rand() fails most of them.
-All modern cryptographic PRNGs should be expected to pass,
-as should Ruby's built-in rand() - an implementation of the Mersenne
-Twister algorithm.
+All modern cryptographic PRNGs should be expected to pass Dieharder. Although
+passing the test does not imply a secure random number generator, failing
+it consistently implies an insceure one, that could be predicted.
+Ruby's built-in rand(), an implementation of the Mersenne Twister algorithm,
+should also pass.
 
-## Date run: 9 May 2014
+Note that there are over 100 tests, and a test that scores a p-value below
+0.01 would be marked "WEAK". For a perfect PRNG it is reasonable to expect
+maybe one to five "WEAK" results in a single run. It was just chance -
+there is roughly a 32% chance that a perfect PRNG gets all Dieharder tests to
+cleanly pass. The usual way to deal with WEAK results is to repeat the offending
+tests and show that other p-values are just as likely.
+
+Generally, when a PRNG fails a Dieharder test systematically, you see a
+very strong signal, p-value below 0.00001 for several related tests.
+
+The test report below implies PoolOfEntropy is free from a variety
+of detectable faults that would prevent it being used as a source of
+statistically random numbers. As it happens, there were no "WEAK" results
+this time.
+
+## Date run: 9-12 May 2014
 
 Completing all the tests took roughly 3 days.
 
