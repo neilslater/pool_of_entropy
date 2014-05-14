@@ -35,6 +35,8 @@ describe PoolOfEntropy::CorePRNG do
       end
 
       it "should fail with bad state data" do
+        expect { PoolOfEntropy::CorePRNG.new( 1, :boo ) }.to raise_error TypeError
+        expect { PoolOfEntropy::CorePRNG.new( 1, [] ) }.to raise_error TypeError
         expect { PoolOfEntropy::CorePRNG.new( 1, '' ) }.to raise_error ArgumentError
         expect { PoolOfEntropy::CorePRNG.new( 1, "\x0" * 63 ) }.to raise_error ArgumentError
         expect { PoolOfEntropy::CorePRNG.new( 1, "\x0" * 200 ) }.to raise_error ArgumentError
