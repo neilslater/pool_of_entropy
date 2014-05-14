@@ -117,7 +117,6 @@ class PoolOfEntropy::CorePRNG
   def generate_integer top, *adjustments
     power = 1
     sum = 0
-    lower_bound = 0
     words = []
 
     loop do
@@ -125,11 +124,8 @@ class PoolOfEntropy::CorePRNG
       sum = 2**32 * sum + words.shift
       power *= 2**32
       lower_bound = sum * top / power
-      upper_bound = ( (sum + 1) * top ) / power
-      break if lower_bound == upper_bound
+      break lower_bound if lower_bound == ( (sum + 1) * top ) / power
     end
-
-    lower_bound
   end
 
   private
