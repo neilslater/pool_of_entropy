@@ -33,20 +33,8 @@ class PoolOfEntropy::CorePRNG
   # @param [Integer] mix_block_id
   # @return [PoolOfEntropy::CorePRNG]
   def initialize size = 1, initial_state = SecureRandom.random_bytes( 64 * Integer(size) ), mix_block_id = 0
-    @size = Integer( size )
-    if @size < 1 || @size > 256
-      raise ArgumentError, "Size of pool must be in Range 1..256, got #{@size}"
-    end
-    unless initial_state.is_a? String
-      raise TypeError, "Initial state must be a String, got #{initial_state.inspect}"
-    end
-    @state = initial_state.clone
-    @state.force_encoding( 'BINARY' )
-
-    if @state.size != size * 64
-      raise ArgumentError, "Initial state bad size - expected #{size * 64} bytes, got #{@state.size} bytes"
-    end
-
+    @size = validate_size( size )
+    @state = validate_state( initial_state, size )
     @mix_block_id = Integer( mix_block_id ) % @size
   end
 
@@ -158,4 +146,24 @@ class PoolOfEntropy::CorePRNG
     folded_32bits.pack('L>*')
   end
 
+  def validate_size i
+    size = Integer( i )
+    if size < 1 || size > 256
+      raise ArgumentError, "Size of pool must be in Range 1..256, got #{size}"
+    end
+    size
+  end
+
+  def validate_state( initial_state, size )
+    unless initial_state.is_a? String
+      raise TypeError, "Initial state must be a String, got #{initial_state.inspect}"
+    end
+    state = initial_state.clone
+    state.force_encoding( 'BINARY' )
+
+    if state.size != size * 64
+      raise ArgumentError, "Initial state bad size - expected #{size * 64} bytes, got #{state.size} bytes"
+    end
+    state
+  end
 end
