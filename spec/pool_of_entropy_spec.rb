@@ -20,6 +20,12 @@ describe PoolOfEntropy do
         end
       end
 
+      it "should fail when param is not a hash" do
+        expect { PoolOfEntropy.new( [:size,12] ) }.to raise_error TypeError
+        expect { PoolOfEntropy.new( '' ) }.to raise_error TypeError
+        expect { PoolOfEntropy.new( :size ) }.to raise_error TypeError
+      end
+
       it "should fail with incorrect :size param" do
         expect { PoolOfEntropy.new( :size => -12 ) }.to raise_error ArgumentError
         expect { PoolOfEntropy.new( :size => -1 ) }.to raise_error ArgumentError
@@ -48,7 +54,7 @@ describe PoolOfEntropy do
         (10..20).map { |x| pool.rand(x) }.should == [8, 3, 0, 12, 11, 2, 4, 8, 1, 11, 18]
       end
 
-      it "should accept and use :seed array" do
+      it "should accept and use :seeds array" do
         pool = PoolOfEntropy.new( :blank => true, :seeds => ['foo'] )
         pool.should be_a PoolOfEntropy
         (10..20).map { |x| pool.rand(x) }.should == [9, 1, 3, 7, 8, 12, 14, 5, 11, 5, 6]
@@ -57,9 +63,14 @@ describe PoolOfEntropy do
         pool.should be_a PoolOfEntropy
         (10..20).map { |x| pool.rand(x) }.should == [8, 1, 5, 8, 2, 7, 11, 8, 8, 13, 14]
       end
+
+      it "should fail if :seeds param is not an array" do
+        expect { PoolOfEntropy.new( :seeds => -12 ) }.to raise_error TypeError
+        expect { PoolOfEntropy.new( :seeds => { :seeds => [2] } ) }.to raise_error TypeError
+        expect { PoolOfEntropy.new( :seeds => 'more_seeds' ) }.to raise_error TypeError
+      end
     end
   end
-
 
   describe "instance methods" do
     pool_types = [
@@ -236,6 +247,18 @@ describe PoolOfEntropy do
                 pool_copy.rand.should == pool.modify_next( modifier ).rand
               end
               # Assert we're back in sync without modifiers
+              pool_copy.rand.should == pool.rand
+            end
+          end
+
+          it "treats a nil modifier as 'do not modify'" do
+            pool_copy = pool.clone
+            10.times do
+              pool_copy.modify_next( 'hello', nil, 'goodbye' )
+              pool_copy.rand.should_not == pool.rand
+              pool_copy.rand.should == pool.rand
+              pool_copy.rand.should_not == pool.rand
+              pool_copy.rand.should == pool.rand
               pool_copy.rand.should == pool.rand
             end
           end
