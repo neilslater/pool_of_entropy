@@ -23,11 +23,12 @@ It also assumes the user has "rolled well enough", which is quite tricky to defi
 placing the die with the number you want facing up does not count.
 
 Unpredictability for the physical die comes from lack of precise control. Imperfections and
-microscopic details of where the die is rolling have a large impact. Quantum mechanics may
-also have an impact if a die collides and bounces enough. Also, a huge influence is how the
-die is thrown, and that comes from the person throwing it. No-one can control their nerves
+microscopic details of where the die is rolling have an impact. Quantum mechanics, which
+as far as we know is inherently probability-based, may also have an impact if a die collides
+and bounces enough. Also, a big influence, mechanically and philosophically, is how the
+die is thrown - and that comes from the person throwing it. No-one can control their nerves
 and muscles to a degree where they "roll well enough" but can consciously choose the
-exact result on the die. However, the impulse you give to a die when you throw it caused
+exact result on the die. However, the impulse you give to a die when you throw it is caused
 by your nerves, bones and muscles. This gives many people a feeling of agency and relationship
 to the end result. It may just be a random number, but in some sense it is *your random
 number because you generated it*.
