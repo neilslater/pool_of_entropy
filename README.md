@@ -6,7 +6,7 @@
 [![Dependency Status](https://gemnasium.com/neilslater/pool_of_entropy.png)](https://gemnasium.com/neilslater/pool_of_entropy)
 
 PoolOfEntropy is a pseudo random number generator (PRNG) based on secure hashes,
-intended to bring back the feeling of 'personal luck' that some gamers may feel when rolling
+intended to bring back the feeling of 'personal agency' that some gamers may feel when rolling
 their *own* dice. An instance of the PoolOfEntropy class could be assigned to a player, or
 to each die in a game, and it can be influenced (similar to throwing a die differently), or
 personalised by feeding in arbitrary data (e.g. a picture of the player, a favourite saying).
@@ -119,6 +119,7 @@ then make use of the modifiers and/or add data to the pool frequently.
 ## More information
 
  * [Rationale](RATIONALE.md)
+ * [Recipes and Suggestions](RECIPES.md)
  * [Dieharder test of statistical randomness](DIEHARDER_TEST.md)
 
 ## Contributing
