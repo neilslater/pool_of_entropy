@@ -40,17 +40,41 @@ Or install it yourself as:
 
 ## Usage
 
-Create a new generator:
+### Create a new generator:
 
     pool = PoolOfEntropy.new
 
-Get a random number. Not feeding the generator with any customisation
+Or
+
+    pool = PoolOfEntropy.new :size => 24
+
+Or
+
+    pool = PoolOfEntropy.new :size => 24, :blank => true
+
+The :size parameter sets the amount of randomness that the pool
+can store, in multiples of 512 bits (or 64 bytes). The default
+size of 1 is fastest, and has a good distribution of values
+statistically. Larger pool sizes (up to 256) will calculate a
+little slower, but can be used to buffer an occasional use
+of a "true random" source.
+
+Setting :blank to true starts the pool with the entire pool
+zero, so that repeatedly using the generator in exactly the same way will
+return the same values.
+
+
+### Get a random number.
+
+Not feeding the generator with any customisation
 means it is completely deterministic based on current internal state. The
 analogy here might be "trusting to Fate":
 
     pool.rand( 20 )
 
-Influence the next random number (but not any others). This is analogous to
+### Influence the next random number (but not any others).
+
+This is analogous to
 shaking or throwing dice in a certain way. Only the next result from rand()
 is affected:
 
@@ -64,7 +88,9 @@ is affected:
     # we re-join the deterministic sequence of the PRNG:
     pool.rand
 
-Influence the next three random numbers. Data supplied to modify_next is
+### Influence the next three random numbers.
+
+Data supplied to modify_next is
 put in a queue, first in, first out:
 
     pool.modify_next( 'Shake the die lots.' )
@@ -77,7 +103,9 @@ put in a queue, first in, first out:
 
     pool.rand #  . . . and back to main sequence
 
-Influence all random numbers from this point forward. This is analogous to
+### Influence all random numbers from this point forward.
+
+This is analogous to
 having a personal style of throwing dice, or perhaps a different environment
 to throw them in.
 
@@ -90,7 +118,7 @@ to throw them in.
     # The two modifier types "stack", and this is modified twice
     pool.modify_next( 'And I really mean it!' ).rand( 20 )
 
-Remove modfiers:
+### Remove modfiers.
 
     # Just the "all" modifier
     pool.modify_all( nil )
@@ -101,7 +129,9 @@ Remove modfiers:
     # Re-set "next" and "all" modifiers
     pool.clear_all_modifiers
 
-Alter internal state of pool. This mixes in any entropy in the supplied
+### Alter internal state of pool.
+
+This mixes in any entropy in the supplied
 data, and changes the deterministic sequence going forward. This is
 analogous to long-term alterations to dice, the environment, or
 person throwing the dice.
@@ -113,7 +143,7 @@ contains *any* "true randomness" (however you want to define it, and however
 the String is formatted), then PoolOfEntropy
 will process that (using SHA-512) into unbiased results. If you care
 about your own source of randomness being more "important" than
-the initial state of the PRNG, or its continued deterministic ticking,
+the initial state of the PRNG or its deterministic progression,
 then make use of the modifiers and/or add data to the pool frequently.
 
 ## More information

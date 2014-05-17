@@ -3,5 +3,7 @@ lib/**/*.rb
 --no-private
 -
 README.md
+RECIPES.md
+RATIONALE.md
 LICENSE.txt
 DIEHARDER_TEST.md
