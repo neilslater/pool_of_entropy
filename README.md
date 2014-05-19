@@ -56,13 +56,12 @@ The :size parameter sets the amount of randomness that the pool
 can store, in multiples of 512 bits (or 64 bytes). The default
 size of 1 is fastest, and has a good distribution of values
 statistically. Larger pool sizes (up to 256) will calculate a
-little slower, but can be used to buffer an occasional use
-of a "true random" source.
+little slower, but can be used to buffer more entropy from
+the #add_to_pool method.
 
 Setting :blank to true starts the pool with the entire pool
-zero, so that repeatedly using the generator in exactly the same way will
-return the same values.
-
+zero, so that repeatedly using the generator in exactly the
+same way will return the same values.
 
 ### Get a random number.
 
@@ -141,7 +140,9 @@ person throwing the dice.
 All the inputs can be any length String, from any source. If the data
 contains *any* "true randomness" (however you want to define it, and however
 the String is formatted), then PoolOfEntropy
-will process that (using SHA-512) into unbiased results. If you care
+will process that (using SHA-512) into unbiased results.
+
+If you care
 about your own source of randomness being more "important" than
 the initial state of the PRNG or its deterministic progression,
 then make use of the modifiers and/or add data to the pool frequently.
