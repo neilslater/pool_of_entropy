@@ -14,7 +14,7 @@ addition, it operates on the application level in a Ruby process, and direct acc
 to that process would allow it to be compromised very easily. Use SecureRandom
 instead.
 
-## Dice for Play By Mail
+## Dice for Play-by-Mail
 
 This was one of the original design goals for the gem. One problem with games
 played where events happen offline is that random numbers may be required when
@@ -28,8 +28,11 @@ To create and use a pool for a player:
 
     # Depending on how many dice rolls will be made offline, I recommend
     # a largish pool here. This 4KB pool, if completely filled with
-    # random data for a player, could generate over 6500 rolls of a d20
-    # that you might consider to be "rolled by the player"
+    # quality random data for a player, could generate over 6500 rolls of a d20
+    # that you might consider to be "rolled by the player" (in the sense that
+    # an infinitely powerful machine that knew the initial state before user
+    # data was added would need to see the results from that many rolls before it
+    # could figure out what the new state was)
 
     freds_entropy = PoolOfEntropy.new :size => 64
 
@@ -65,7 +68,3 @@ The gem games_dice will accept a PoolOfEntropy object as a generator for a dice 
     # => 21
     freds_attack.explain_result
     # => "1d20: 15. 15 + 6 = 21"
-
-## Tracking Entropy
-
-*Please do not take the following as an academic description of entropy.*
