@@ -6,17 +6,17 @@ describe PoolOfEntropy do
     describe "#new" do
       it "should instantiate a default object" do
         pool = PoolOfEntropy.new
-        pool.should be_a PoolOfEntropy
+        expect( pool ).to be_a PoolOfEntropy
       end
 
       it "should allow setting number of blocks in pool" do
         [1,3,5,8,13,21,34,55,89,144,233].each do |s|
           pool = PoolOfEntropy.new( :size => 12 )
-          pool.should be_a PoolOfEntropy
+          expect( pool ).to be_a PoolOfEntropy
           num = pool.rand()
-          num.should be_a Float
-          num.should >= 0.0
-          num.should < 1.0
+          expect( num ).to be_a Float
+          expect( num ).to be >= 0.0
+          expect( num ).to be < 1.0
         end
       end
 
@@ -38,30 +38,30 @@ describe PoolOfEntropy do
 
       it "should default to unpredicatble internal state" do
         pool = PoolOfEntropy.new()
-        pool.should be_a PoolOfEntropy
-        (10..20).map { |x| pool.rand(x) }.should_not == [8, 3, 0, 12, 11, 2, 4, 8, 1, 11, 18]
+        expect( pool ).to be_a PoolOfEntropy
+        expect( (10..20).map { |x| pool.rand(x) } ).to_not eql [8, 3, 0, 12, 11, 2, 4, 8, 1, 11, 18]
       end
 
       it "should accept { :blank => false } as explicit statement of default" do
         pool = PoolOfEntropy.new( :blank => false )
-        pool.should be_a PoolOfEntropy
-        (10..20).map { |x| pool.rand(x) }.should_not == [8, 3, 0, 12, 11, 2, 4, 8, 1, 11, 18]
+        expect( pool ).to be_a PoolOfEntropy
+        expect( (10..20).map { |x| pool.rand(x) } ).to_not eql [8, 3, 0, 12, 11, 2, 4, 8, 1, 11, 18]
       end
 
       it "should allow an initial blank internal state" do
         pool = PoolOfEntropy.new( :blank => true )
-        pool.should be_a PoolOfEntropy
-        (10..20).map { |x| pool.rand(x) }.should == [8, 3, 0, 12, 11, 2, 4, 8, 1, 11, 18]
+        expect( pool ).to be_a PoolOfEntropy
+        expect( (10..20).map { |x| pool.rand(x) } ).to eql [8, 3, 0, 12, 11, 2, 4, 8, 1, 11, 18]
       end
 
       it "should accept and use :seeds array" do
         pool = PoolOfEntropy.new( :blank => true, :seeds => ['foo'] )
-        pool.should be_a PoolOfEntropy
-        (10..20).map { |x| pool.rand(x) }.should == [9, 1, 3, 7, 8, 12, 14, 5, 11, 5, 6]
+        expect( pool ).to be_a PoolOfEntropy
+        expect( (10..20).map { |x| pool.rand(x) } ).to eql [9, 1, 3, 7, 8, 12, 14, 5, 11, 5, 6]
 
         pool = PoolOfEntropy.new( :blank => true, :seeds => ['foo', 'bar'] )
-        pool.should be_a PoolOfEntropy
-        (10..20).map { |x| pool.rand(x) }.should == [8, 1, 5, 8, 2, 7, 11, 8, 8, 13, 14]
+        expect( pool ).to be_a PoolOfEntropy
+        expect( (10..20).map { |x| pool.rand(x) } ).to eql [8, 1, 5, 8, 2, 7, 11, 8, 8, 13, 14]
       end
 
       it "should fail if :seeds param is not an array" do
@@ -117,7 +117,7 @@ describe PoolOfEntropy do
 
             pool_copy = pool.clone
             100.times do
-              pool_copy.rand().should == pool.rand()
+              expect( pool_copy.rand() ).to eql pool.rand()
             end
           end
         end
@@ -128,20 +128,20 @@ describe PoolOfEntropy do
             it "should call PoolOfEntropy::CorePRNG::read_bytes internally" do
               allow_any_instance_of( PoolOfEntropy::CorePRNG).
                   to receive( :read_bytes ).and_return( "\x1e\xfe" * 8 )
-              20.times { pool.rand.should == 0.12106507972838931 }
+              20.times { expect( pool.rand ).to eql 0.12106507972838931 }
             end
 
             it "should return a Float between 0.0 and 1.0" do
               100.times do
                 num = pool.rand
-                num.should be_a Float
-                num.should >= 0.0
-                num.should < 1.0
+                expect( num ).to be_a Float
+                expect( num ).to be >= 0.0
+                expect( num ).to be < 1.0
               end
             end
 
             it "should return a different Float each time (with high probability) " do
-              Set[ *(1..100).map{ pool.rand } ].size.should == 100
+              expect( Set[ *(1..100).map{ pool.rand } ].size ).to eql 100
             end
           end
 
@@ -149,27 +149,27 @@ describe PoolOfEntropy do
             it "should call PoolOfEntropy::CorePRNG::read_bytes internally" do
               allow_any_instance_of( PoolOfEntropy::CorePRNG).
                   to receive( :read_bytes ).and_return( "\x1e\xfe" * 8 )
-              20.times { pool.rand(20).should == 2 }
+              20.times { expect( pool.rand(20) ).to eql 2 }
             end
 
             it "should return an Integer between 0 and x (excluding x)" do
               [ 1, 2, 3, 5, 8, 13, 21, 34, 55, 89 ].each do |x|
                 100.times do
                   num = pool.rand( x )
-                  num.should be_a Fixnum
-                  num.should >= 0
-                  num.should < x
+                  expect( num ).to be_a Fixnum
+                  expect( num ).to be >= 0
+                  expect( num ).to be < x
                 end
               end
             end
 
             # This is a very weak test of randomness, see DIEHARDER_TEST.md
             it "should select values without obvious bias" do
-              Set[ *(1..200).map{ pool.rand( 20 ) } ].size.should == 20
+              expect( Set[ *(1..200).map{ pool.rand( 20 ) } ].size ).to eql 20
             end
 
             it "should return a different Integer each time (with high probability for large x) " do
-              Set[ *(1..100).map{ pool.rand( 2**64 ) } ].size.should == 100
+              expect( Set[ *(1..100).map{ pool.rand( 2**64 ) } ].size ).to eql 100
             end
           end
 
@@ -177,22 +177,22 @@ describe PoolOfEntropy do
             it "should call PoolOfEntropy::CorePRNG::read_bytes internally" do
               allow_any_instance_of( PoolOfEntropy::CorePRNG).
                   to receive( :read_bytes ).and_return( "\x1e\xfe" * 8 )
-              20.times { pool.rand( 7..28 ).should == 9 }
+              20.times { expect( pool.rand( 7..28 ) ).to eql 9 }
             end
 
             it "should return an Integer that is a member of the range" do
               [ 1..2, 2..5, 3..8, 5..13, 21..34, 55..89 ].each do |r|
                 100.times do
                   num = pool.rand( r )
-                  num.should be_a Fixnum
-                  num.should >= r.min
-                  num.should <= r.max
+                  expect( num ).to be_a Fixnum
+                  expect( num ).to be >= r.min
+                  expect( num ).to be <= r.max
                 end
               end
             end
 
             it "should return a different Integer each time (with high probability for large range) " do
-              Set[ *(1..100).map{ pool.rand( 100000000000..200000000000 ) } ].size.should == 100
+              expect( Set[ *(1..100).map{ pool.rand( 100000000000..200000000000 ) } ].size ).to eql 100
             end
 
           end
@@ -205,7 +205,7 @@ describe PoolOfEntropy do
             pool_copy = pool.clone
             100.times do
               modifier = SecureRandom.hex
-              pool_copy.modify_next( modifier ).rand.should_not == pool.rand
+              expect( pool_copy.modify_next( modifier ).rand ).to_not eql pool.rand
             end
           end
 
@@ -213,7 +213,7 @@ describe PoolOfEntropy do
             pool_copy = pool.clone
             100.times do
               modifier = SecureRandom.hex
-              pool_copy.modify_next( modifier ).rand.should == pool.modify_next( modifier ).rand
+              expect( pool_copy.modify_next( modifier ).rand ).to eql pool.modify_next( modifier ).rand
             end
           end
 
@@ -221,8 +221,8 @@ describe PoolOfEntropy do
             pool_copy = pool.clone
             100.times do
               modifier = SecureRandom.hex
-              pool_copy.modify_next( modifier ).rand.should_not == pool.rand
-              pool_copy.rand.should == pool.rand
+              expect( pool_copy.modify_next( modifier ).rand ).to_not eql pool.rand
+              expect( pool_copy.rand ).to eql pool.rand
             end
           end
 
@@ -234,20 +234,20 @@ describe PoolOfEntropy do
               # Syntax for all-at-once
               pool_copy.modify_next( *modifiers )
               modifiers.each do |modifier|
-                pool_copy.rand.should == pool.modify_next( modifier ).rand
+                expect( pool_copy.rand ).to eql pool.modify_next( modifier ).rand
               end
               # Assert we're back in sync without modifiers
-              pool_copy.rand.should == pool.rand
+              expect( pool_copy.rand ).to eql pool.rand
 
               # Adding to queue one-at-a-time
               modifiers.each do |modifier|
                 pool_copy.modify_next( modifier )
               end
               modifiers.each do |modifier|
-                pool_copy.rand.should == pool.modify_next( modifier ).rand
+                expect( pool_copy.rand ).to eql pool.modify_next( modifier ).rand
               end
               # Assert we're back in sync without modifiers
-              pool_copy.rand.should == pool.rand
+              expect( pool_copy.rand ).to eql pool.rand
             end
           end
 
@@ -255,11 +255,11 @@ describe PoolOfEntropy do
             pool_copy = pool.clone
             10.times do
               pool_copy.modify_next( 'hello', nil, 'goodbye' )
-              pool_copy.rand.should_not == pool.rand
-              pool_copy.rand.should == pool.rand
-              pool_copy.rand.should_not == pool.rand
-              pool_copy.rand.should == pool.rand
-              pool_copy.rand.should == pool.rand
+              expect( pool_copy.rand ).to_not eql pool.rand
+              expect( pool_copy.rand ).to eql pool.rand
+              expect( pool_copy.rand ).to_not eql pool.rand
+              expect( pool_copy.rand ).to eql pool.rand
+              expect( pool_copy.rand ).to eql pool.rand
             end
           end
         end # modify_next
@@ -269,9 +269,9 @@ describe PoolOfEntropy do
             pool_copy = pool.clone
             10.times do
               modifier = SecureRandom.hex
-              pool_copy.modify_all( modifier ).rand.should_not == pool.rand
+              expect( pool_copy.modify_all( modifier ).rand ).to_not eql pool.rand
               10.times do
-                pool_copy.rand.should_not == pool.rand
+                expect( pool_copy.rand ).to_not eql pool.rand
               end
             end
           end
@@ -280,9 +280,9 @@ describe PoolOfEntropy do
             pool_copy = pool.clone
             10.times do
               modifier = SecureRandom.hex
-              pool_copy.modify_all( modifier ).rand.should == pool.modify_all( modifier ).rand
+              expect( pool_copy.modify_all( modifier ).rand ).to eql pool.modify_all( modifier ).rand
               10.times do
-                pool_copy.rand.should == pool.rand
+                expect( pool_copy.rand ).to eql pool.rand
               end
             end
           end
@@ -291,7 +291,7 @@ describe PoolOfEntropy do
             pool_copy = pool.clone
             100.times do
               modifier = SecureRandom.hex
-              pool_copy.modify_all( modifier ).rand.should == pool.modify_next( modifier ).rand
+              expect( pool_copy.modify_all( modifier ).rand ).to eql pool.modify_next( modifier ).rand
             end
           end
 
@@ -299,11 +299,11 @@ describe PoolOfEntropy do
             pool_copy = pool.clone
             10.times do
               modifier = SecureRandom.hex
-              pool_copy.modify_all( modifier ).rand.should_not == pool.rand
-              pool_copy.rand.should_not == pool.rand
+              expect( pool_copy.modify_all( modifier ).rand ).to_not eql pool.rand
+              expect( pool_copy.rand ).to_not eql pool.rand
               pool_copy.modify_all( nil )
               10.times do
-                pool_copy.rand.should == pool.rand
+                expect( pool_copy.rand ).to eql pool.rand
               end
             end
           end
@@ -317,10 +317,10 @@ describe PoolOfEntropy do
             10.times do
               modifiers = (0..5).map { SecureRandom.hex }
               pool_copy.modify_next( *modifiers )
-              pool_copy.rand.should_not == pool.rand
+              expect( pool_copy.rand ).to_not eql pool.rand
               pool_copy.clear_all_modifiers
               10.times do
-                pool_copy.rand.should == pool.rand
+                expect( pool_copy.rand ).to eql pool.rand
               end
             end
           end
@@ -329,11 +329,11 @@ describe PoolOfEntropy do
             pool_copy = pool.clone
             10.times do
               modifier = SecureRandom.hex
-              pool_copy.modify_all( modifier ).rand.should_not == pool.rand
-              pool_copy.rand.should_not == pool.rand
+              expect( pool_copy.modify_all( modifier ).rand ).to_not eql pool.rand
+              expect( pool_copy.rand ).to_not eql pool.rand
               pool_copy.clear_all_modifiers
               10.times do
-                pool_copy.rand.should == pool.rand
+                expect( pool_copy.rand ).to eql pool.rand
               end
             end
           end
@@ -343,11 +343,11 @@ describe PoolOfEntropy do
             10.times do
               modifier = SecureRandom.hex
               pool_copy.modify_next( *(0..5).map { SecureRandom.hex } )
-              pool_copy.modify_all( modifier ).rand.should_not == pool.rand
-              pool_copy.rand.should_not == pool.rand
+              expect( pool_copy.modify_all( modifier ).rand ).to_not eql pool.rand
+              expect( pool_copy.rand ).to_not eql pool.rand
               pool_copy.clear_all_modifiers
               10.times do
-                pool_copy.rand.should == pool.rand
+                expect( pool_copy.rand ).to eql pool.rand
               end
             end
           end
@@ -359,7 +359,7 @@ describe PoolOfEntropy do
             pool_copy = pool.clone
             pool_copy.add_to_pool( 'Some user data!' )
             100.times do
-              pool_copy.rand.should_not == pool.rand
+              expect( pool_copy.rand ).to_not eql pool.rand
             end
           end
 
@@ -372,7 +372,7 @@ describe PoolOfEntropy do
               pool.add_to_pool( user_data )
 
               10.times do
-                pool_copy.rand.should == pool.rand
+                expect( pool_copy.rand ).to eql pool.rand
               end
             end
           end

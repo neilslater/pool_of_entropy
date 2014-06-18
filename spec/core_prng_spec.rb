@@ -6,14 +6,14 @@ describe PoolOfEntropy::CorePRNG do
     describe "#new" do
       it "should instantiate a default object" do
         prng = PoolOfEntropy::CorePRNG.new
-        prng.should be_a PoolOfEntropy::CorePRNG
-        prng.size.should == 1
+        expect( prng ).to be_a PoolOfEntropy::CorePRNG
+        expect( prng.size ).to be 1
       end
 
       it "should allow setting number of blocks in pool" do
         prng = PoolOfEntropy::CorePRNG.new( 10 )
-        prng.should be_a PoolOfEntropy::CorePRNG
-        prng.size.should == 10
+        expect( prng ).to be_a PoolOfEntropy::CorePRNG
+        expect( prng.size ).to be 10
       end
 
       it "should fail with incorrect block number" do
@@ -29,9 +29,9 @@ describe PoolOfEntropy::CorePRNG do
 
       it "should allow setting internal state" do
         prng = PoolOfEntropy::CorePRNG.new( 1, "\x0" * 64 )
-        prng.should be_a PoolOfEntropy::CorePRNG
-        prng.size.should == 1
-        prng.state.should == "\x0" * 64
+        expect( prng ).to be_a PoolOfEntropy::CorePRNG
+        expect( prng.size ).to be 1
+        expect( prng.state ).to eql "\x0" * 64
       end
 
       it "should fail with bad state data" do
@@ -45,10 +45,10 @@ describe PoolOfEntropy::CorePRNG do
 
       it "should allow setting mix_block_id" do
         prng = PoolOfEntropy::CorePRNG.new( 3, "\x12" * 192, 1 )
-        prng.should be_a PoolOfEntropy::CorePRNG
-        prng.size.should == 3
-        prng.state.should == "\x12" * 192
-        prng.mix_block_id.should == 1
+        expect( prng ).to be_a PoolOfEntropy::CorePRNG
+        expect( prng.size ).to eql 3
+        expect( prng.state ).to eql "\x12" * 192
+        expect( prng.mix_block_id ).to eql 1
       end
     end
   end
@@ -60,15 +60,15 @@ describe PoolOfEntropy::CorePRNG do
         prng_orig = PoolOfEntropy::CorePRNG.new
         prng_copy = prng_orig.clone
 
-        prng_copy.size.should == prng_orig.size
-        prng_copy.state.should == prng_orig.state
-        prng_copy.mix_block_id.should == prng_orig.mix_block_id
+        expect( prng_copy.size ).to eql prng_orig.size
+        expect( prng_copy.state ).to eql prng_orig.state
+        expect( prng_copy.mix_block_id ).to eql prng_orig.mix_block_id
       end
 
       it "should deep clone the internal state string" do
         prng_orig = PoolOfEntropy::CorePRNG.new
         prng_copy = prng_orig.clone
-        prng_copy.state.should_not be prng_orig.state
+        expect( prng_copy.state ).to_not be prng_orig.state
       end
     end
 
@@ -77,25 +77,25 @@ describe PoolOfEntropy::CorePRNG do
         prng = PoolOfEntropy::CorePRNG.new
         init_state = prng.state.clone
         prng.update( 'boo' )
-        prng.state.should_not == init_state
+        expect( prng.state ).to_not eql init_state
       end
 
       it "should not change the length of the internal state" do
         prng = PoolOfEntropy::CorePRNG.new
         prng.update( 'boo' )
-        prng.state.length.should == 64
+        expect( prng.state.length ).to eql 64
         prng.update( 'boowgkjwrhqgioueqrhgiue2hguirhqwiughreuioghreuifhqwoifhr3iufghfwrgrwgetdfwd' )
-        prng.state.length.should == 64
+        expect( prng.state.length ).to eql 64
 
         prng = PoolOfEntropy::CorePRNG.new( 5 )
         prng.update( 'boo' )
-        prng.state.length.should == 5 * 64
+        expect( prng.state.length ).to eql 5 * 64
         prng.update( 'getdfwd' * 1000 )
-        prng.state.length.should == 5 * 64
+        expect( prng.state.length ).to eql 5 * 64
         prng.update( 'boefewfweo' )
-        prng.state.length.should == 5 * 64
+        expect( prng.state.length ).to eql 5 * 64
         prng.update( 'geefewftdfwd' * 1000 )
-        prng.state.length.should == 5 * 64
+        expect( prng.state.length ).to eql 5 * 64
       end
 
       it "should only change 64 bytes of state at a time" do
@@ -103,22 +103,22 @@ describe PoolOfEntropy::CorePRNG do
         init_state = prng.state.clone
 
         prng.update( 'boo' )
-        prng.state[64,4*64].should == init_state[64,4*64]
+        expect( prng.state[64,4*64] ).to eql init_state[64,4*64]
         next_state = prng.state.clone
 
         prng.update( 'getdfwd' * 1000 )
-        prng.state[128,3*64].should == init_state[128,3*64]
-        prng.state[0,1*64].should == next_state[0,1*64]
+        expect( prng.state[128,3*64] ).to eql init_state[128,3*64]
+        expect( prng.state[0,1*64] ).to eql next_state[0,1*64]
         next_state = prng.state.clone
 
         prng.update( 'boefewfweo' )
-        prng.state[192,2*64].should == init_state[192,2*64]
-        prng.state[0,2*64].should == next_state[0,2*64]
+        expect( prng.state[192,2*64] ).to eql init_state[192,2*64]
+        expect( prng.state[0,2*64] ).to eql next_state[0,2*64]
         next_state = prng.state.clone
 
         prng.update( 'geefewftdfwd' * 1000 )
-        prng.state[256,1*64].should == init_state[256,1*64]
-        prng.state[0,3*64].should == next_state[0,3*64]
+        expect( prng.state[256,1*64] ).to eql init_state[256,1*64]
+        expect( prng.state[0,3*64] ).to eql next_state[0,3*64]
       end
     end
 
@@ -163,40 +163,40 @@ describe PoolOfEntropy::CorePRNG do
 
         describe "#read_bytes" do
           it "always returns a 16 byte string" do
-            100.times { prng.read_bytes.length.should == 16 }
+            100.times { expect( prng.read_bytes.length ).to eql 16 }
           end
 
           it "has a high probability of returning a different string each time" do
-            Set[ *(1..100).map {prng.read_bytes} ].size.should == 100
+            expect( Set[ *(1..100).map {prng.read_bytes} ].size ).to eql 100
           end
 
           describe "with adjustments" do
             it "always returns a 16 byte string" do
-              100.times { prng.read_bytes('654321').length.should == 16 }
+              100.times { expect( prng.read_bytes('654321').length ).to eql 16 }
             end
 
             it "has a high probability of returning a different string each time" do
-              Set[ *(1..100).map {prng.read_bytes('654321')} ].size.should == 100
+              expect( Set[ *(1..100).map {prng.read_bytes('654321')} ].size ).to eql 100
             end
 
             it "changes output, but does not include adjustments in changes to state" do
               prng_copy = prng.clone
               10.times do
-                prng.read_bytes('Hello!').should == prng_copy.read_bytes('Hello!')
-                prng.state.should == prng_copy.state
-                prng.read_bytes('Hello!').should_not == prng_copy.read_bytes('Goodbye!')
-                prng.state.should == prng_copy.state
-                prng.read_bytes.should_not == prng_copy.read_bytes('Goodbye!')
-                prng.state.should == prng_copy.state
-                prng.read_bytes('Hello!').should_not == prng_copy.read_bytes
-                prng.state.should == prng_copy.state
-                prng.read_bytes('Hello','Goodbye').should_not == prng_copy.read_bytes
-                prng.state.should == prng_copy.state
+                expect( prng.read_bytes('Hello!') ).to eql prng_copy.read_bytes('Hello!')
+                expect( prng.state ).to eql prng_copy.state
+                expect( prng.read_bytes('Hello!') ).to_not eql prng_copy.read_bytes('Goodbye!')
+                expect( prng.state ).to eql prng_copy.state
+                expect( prng.read_bytes ).to_not eql prng_copy.read_bytes('Goodbye!')
+                expect( prng.state ).to eql prng_copy.state
+                expect( prng.read_bytes('Hello!') ).to_not eql prng_copy.read_bytes
+                expect( prng.state ).to eql prng_copy.state
+                expect( prng.read_bytes('Hello','Goodbye') ).to_not eql prng_copy.read_bytes
+                expect( prng.state ).to eql prng_copy.state
                 # Verify that output remains same for next rolls
-                prng.read_bytes('Foobar','Wibble').should == prng_copy.read_bytes('Foobar','Wibble')
-                prng.state.should == prng_copy.state
-                prng.read_bytes.should == prng_copy.read_bytes
-                prng.state.should == prng_copy.state
+                expect( prng.read_bytes('Foobar','Wibble') ).to eql prng_copy.read_bytes('Foobar','Wibble')
+                expect( prng.state ).to eql prng_copy.state
+                expect( prng.read_bytes ).to eql prng_copy.read_bytes
+                expect( prng.state ).to eql prng_copy.state
               end
             end
           end
@@ -206,46 +206,46 @@ describe PoolOfEntropy::CorePRNG do
           it "always returns a 32 digit hex string" do
             100.times do
               hex = prng.read_hex
-              hex.length.should == 32
-              hex.should match /\A[0-9a-f]{32}\z/
+              expect( hex.length ).to eql 32
+              expect( hex ).to match /\A[0-9a-f]{32}\z/
             end
           end
 
           it "has a high probability of returning a different string each time" do
-            Set[ *(1..100).map {prng.read_hex} ].size.should == 100
+            expect( Set[ *(1..100).map {prng.read_hex} ].size ).to eql 100
           end
 
           describe "with adjustments" do
             it "always returns a 32 digit hex string" do
               100.times do
                 hex = prng.read_hex('QWertyeu')
-                hex.length.should == 32
-                hex.should match /\A[0-9a-f]{32}\z/
+                expect( hex.length ).to eql 32
+                expect( hex ).to match /\A[0-9a-f]{32}\z/
               end
             end
 
             it "has a high probability of returning a different string each time" do
-              Set[ *(1..100).map {prng.read_hex('654321')} ].size.should == 100
+              expect( Set[ *(1..100).map {prng.read_hex('654321')} ].size ).to eql 100
             end
 
             it "changes output, but does not include adjustments in changes to state" do
               prng_copy = prng.clone
               10.times do
-                prng.read_hex('Hello!').should == prng_copy.read_hex('Hello!')
-                prng.state.should == prng_copy.state
-                prng.read_hex('Hello!').should_not == prng_copy.read_hex('Goodbye!')
-                prng.state.should == prng_copy.state
-                prng.read_hex.should_not == prng_copy.read_hex('Goodbye!')
-                prng.state.should == prng_copy.state
-                prng.read_hex('Hello!').should_not == prng_copy.read_hex
-                prng.state.should == prng_copy.state
-                prng.read_hex('Hello','Goodbye').should_not == prng_copy.read_hex
-                prng.state.should == prng_copy.state
+                expect( prng.read_hex('Hello!') ).to eql prng_copy.read_hex('Hello!')
+                expect( prng.state ).to eql prng_copy.state
+                expect( prng.read_hex('Hello!') ).to_not eql prng_copy.read_hex('Goodbye!')
+                expect( prng.state ).to eql prng_copy.state
+                expect( prng.read_hex ).to_not eql prng_copy.read_hex('Goodbye!')
+                expect( prng.state ).to eql prng_copy.state
+                expect( prng.read_hex('Hello!') ).to_not eql prng_copy.read_hex
+                expect( prng.state ).to eql prng_copy.state
+                expect( prng.read_hex('Hello','Goodbye') ).to_not eql prng_copy.read_hex
+                expect( prng.state ).to eql prng_copy.state
                 # Verify that output remains same for next rolls
-                prng.read_hex('Foobar','Wibble').should == prng_copy.read_hex('Foobar','Wibble')
-                prng.state.should == prng_copy.state
-                prng.read_hex.should == prng_copy.read_hex
-                prng.state.should == prng_copy.state
+                expect( prng.read_hex('Foobar','Wibble') ).to eql prng_copy.read_hex('Foobar','Wibble')
+                expect( prng.state ).to eql prng_copy.state
+                expect( prng.read_hex ).to eql prng_copy.read_hex
+                expect( prng.state ).to eql prng_copy.state
               end
             end
           end
@@ -255,46 +255,46 @@ describe PoolOfEntropy::CorePRNG do
           it "always returns a 128-bit unsigned integer" do
             100.times do
               num = prng.read_bignum
-              num.should >= 0
-              num.should < 2**128
+              expect( num ).to be >= 0
+              expect( num ).to be < 2**128
             end
           end
 
           it "has a high probability of returning a different number each time" do
-            Set[ *(1..100).map {prng.read_bignum} ].size.should == 100
+            expect( Set[ *(1..100).map {prng.read_bignum} ].size ).to eql 100
           end
 
           describe "with adjustments" do
             it "always returns a 128-bit unsigned integer" do
               100.times do
                 num = prng.read_bignum( 'Biggest' )
-                num.should >= 0
-                num.should < 2**128
+                expect( num ).to be >= 0
+                expect( num ).to be < 2**128
               end
             end
 
             it "has a high probability of returning a different number each time" do
-              Set[ *(1..100).map {prng.read_bignum('654321')} ].size.should == 100
+              expect( Set[ *(1..100).map {prng.read_bignum('654321')} ].size ).to eql 100
             end
 
             it "changes output, but does not include adjustments in changes to state" do
               prng_copy = prng.clone
               10.times do
-                prng.read_bignum('Hello!').should == prng_copy.read_bignum('Hello!')
-                prng.state.should == prng_copy.state
-                prng.read_bignum('Hello!').should_not == prng_copy.read_bignum('Goodbye!')
-                prng.state.should == prng_copy.state
-                prng.read_bignum.should_not == prng_copy.read_bignum('Goodbye!')
-                prng.state.should == prng_copy.state
-                prng.read_bignum('Hello!').should_not == prng_copy.read_bignum
-                prng.state.should == prng_copy.state
-                prng.read_bignum('Hello','Goodbye').should_not == prng_copy.read_bignum
-                prng.state.should == prng_copy.state
+                expect( prng.read_bignum('Hello!') ).to eql prng_copy.read_bignum('Hello!')
+                expect( prng.state ).to eql prng_copy.state
+                expect( prng.read_bignum('Hello!') ).to_not eql prng_copy.read_bignum('Goodbye!')
+                expect( prng.state ).to eql prng_copy.state
+                expect( prng.read_bignum ).to_not eql prng_copy.read_bignum('Goodbye!')
+                expect( prng.state ).to eql prng_copy.state
+                expect( prng.read_bignum('Hello!') ).to_not eql prng_copy.read_bignum
+                expect( prng.state ).to eql prng_copy.state
+                expect( prng.read_bignum('Hello','Goodbye') ).to_not eql prng_copy.read_bignum
+                expect( prng.state ).to eql prng_copy.state
                 # Verify that output remains same for next rolls
-                prng.read_bignum('Foobar','Wibble').should == prng_copy.read_bignum('Foobar','Wibble')
-                prng.state.should == prng_copy.state
-                prng.read_bignum.should == prng_copy.read_bignum
-                prng.state.should == prng_copy.state
+                expect( prng.read_bignum('Foobar','Wibble') ).to eql prng_copy.read_bignum('Foobar','Wibble')
+                expect( prng.state ).to eql prng_copy.state
+                expect( prng.read_bignum ).to eql prng_copy.read_bignum
+                expect( prng.state ).to eql prng_copy.state
               end
             end
           end
@@ -304,48 +304,48 @@ describe PoolOfEntropy::CorePRNG do
           it "always returns a Float between 0.0 (inclusive) and 1.0 (exclusive)" do
             100.times do
               num = prng.read_float
-              num.should be_a Float
-              num.should >= 0.0
-              num.should < 1.0
+              expect( num ).to be_a Float
+              expect( num ).to be >= 0.0
+              expect( num ).to be < 1.0
             end
           end
 
           it "has a high probability of returning a different Float each time" do
-            Set[ *(1..100).map {prng.read_float} ].size.should == 100
+            expect( Set[ *(1..100).map {prng.read_float} ].size ).to eql 100
           end
 
           describe "with adjustments" do
             it "always returns a Float between 0.0 (inclusive) and 1.0 (exclusive)" do
               100.times do
                 num = prng.read_float('Boom')
-                num.should be_a Float
-                num.should >= 0.0
-                num.should < 1.0
+                expect( num ).to be_a Float
+                expect( num ).to be >= 0.0
+                expect( num ).to be < 1.0
               end
             end
 
             it "has a high probability of returning a different Float each time" do
-              Set[ *(1..100).map {prng.read_float('654321')} ].size.should == 100
+              expect( Set[ *(1..100).map {prng.read_float('654321')} ].size ).to eql 100
             end
 
             it "changes output, but does not include adjustments in changes to state" do
               prng_copy = prng.clone
               10.times do
-                prng.read_float('Hello!').should == prng_copy.read_float('Hello!')
-                prng.state.should == prng_copy.state
-                prng.read_float('Hello!').should_not == prng_copy.read_float('Goodbye!')
-                prng.state.should == prng_copy.state
-                prng.read_float.should_not == prng_copy.read_float('Goodbye!')
-                prng.state.should == prng_copy.state
-                prng.read_float('Hello!').should_not == prng_copy.read_float
-                prng.state.should == prng_copy.state
-                prng.read_float('Hello','Goodbye').should_not == prng_copy.read_float
-                prng.state.should == prng_copy.state
+                expect( prng.read_float('Hello!') ).to eql prng_copy.read_float('Hello!')
+                expect( prng.state ).to eql prng_copy.state
+                expect( prng.read_float('Hello!') ).to_not eql prng_copy.read_float('Goodbye!')
+                expect( prng.state ).to eql prng_copy.state
+                expect( prng.read_float ).to_not eql prng_copy.read_float('Goodbye!')
+                expect( prng.state ).to eql prng_copy.state
+                expect( prng.read_float('Hello!') ).to_not eql prng_copy.read_float
+                expect( prng.state ).to eql prng_copy.state
+                expect( prng.read_float('Hello','Goodbye') ).to_not eql prng_copy.read_float
+                expect( prng.state ).to eql prng_copy.state
                 # Verify that output remains same for next rolls
-                prng.read_float('Foobar','Wibble').should == prng_copy.read_float('Foobar','Wibble')
-                prng.state.should == prng_copy.state
-                prng.read_float.should == prng_copy.read_float
-                prng.state.should == prng_copy.state
+                expect( prng.read_float('Foobar','Wibble') ).to eql prng_copy.read_float('Foobar','Wibble')
+                expect( prng.state ).to eql prng_copy.state
+                expect( prng.read_float ).to eql prng_copy.read_float
+                expect( prng.state ).to eql prng_copy.state
               end
             end
           end
@@ -355,84 +355,84 @@ describe PoolOfEntropy::CorePRNG do
           it "always returns an integer between 0 (inclusive) and supplied top (exclusive)" do
             100.times do
               num = prng.generate_integer( 10 )
-              num.should be_a Fixnum
-              num.should >= 0
-              num.should < 10
+              expect( num ).to be_a Fixnum
+              expect( num ).to be >= 0
+              expect( num ).to be < 10
             end
 
             100.times do
               num = prng.generate_integer( 100 )
-              num.should be_a Fixnum
-              num.should >= 0
-              num.should < 100
+              expect( num ).to be_a Fixnum
+              expect( num ).to be >= 0
+              expect( num ).to be < 100
             end
 
             100.times do
               num = prng.generate_integer( 1000 )
-              num.should be_a Fixnum
-              num.should >= 0
-              num.should < 1000
+              expect( num ).to be_a Fixnum
+              expect( num ).to be >= 0
+              expect( num ).to be < 1000
             end
 
             100.times do
               num = prng.generate_integer( 647218456 )
-              num.should be_a Fixnum
-              num.should >= 0
-              num.should < 647218456
+              expect( num ).to be_a Fixnum
+              expect( num ).to be >= 0
+              expect( num ).to be < 647218456
             end
           end
 
           it "can generate integers larger than 2**128" do
             results = (0..100).map do
               num = prng.generate_integer( 2 ** 1024 )
-              num.should >= 0
-              num.should < 2 ** 1024
+              expect( num ).to be >= 0
+              expect( num ).to be < 2 ** 1024
               num
             end
-            results.select { |n| n > 2 ** 1020 }.count.should > 50
+            expect( results.select { |n| n > 2 ** 1020 }.count ).to be > 50
           end
 
           it "with a large enough value for top, has a high probability of returning a different integer each time" do
-            Set[ *(1..100).map {prng.generate_integer( 2**75 - 7 )} ].size.should == 100
+            expect( Set[ *(1..100).map {prng.generate_integer( 2**75 - 7 )} ].size ).to eql 100
           end
 
           it "covers a distribution 0...top" do
-            Set[ *(1..100).map {prng.generate_integer(10)} ].size.should == 10
+            expect( Set[ *(1..100).map {prng.generate_integer(10)} ].size ).to eql 10
           end
 
           describe "with adjustments" do
             it "always returns an integer between 0 (inclusive) and supplied top (exclusive)" do
               100.times do
                 num = prng.generate_integer( 10, 'jkffwe' )
-                num.should be_a Fixnum
-                num.should >= 0
-                num.should < 10
+                expect( num ).to be_a Fixnum
+                expect( num ).to be >= 0
+                expect( num ).to be < 10
               end
 
               100.times do
                 num = prng.generate_integer( 100, 'jkffweefewg' )
-                num.should be_a Fixnum
-                num.should >= 0
-                num.should < 100
+                expect( num ).to be_a Fixnum
+                expect( num ).to be >= 0
+                expect( num ).to be < 100
               end
 
               100.times do
                 num = prng.generate_integer( 1000, 'jkffweefewg', 'efhwjkfgw' )
-                num.should be_a Fixnum
-                num.should >= 0
-                num.should < 1000
+                expect( num ).to be_a Fixnum
+                expect( num ).to be >= 0
+                expect( num ).to be < 1000
               end
 
               100.times do
                 num = prng.generate_integer( 647218456, 'j*****g', 'efhwjkfgw' )
-                num.should be_a Fixnum
-                num.should >= 0
-                num.should < 647218456
+                expect( num ).to be_a Fixnum
+                expect( num ).to be >= 0
+                expect( num ).to be < 647218456
               end
             end
 
             it "with a large enough value for top, has a high probability of returning a different integer each time" do
-              Set[ *(1..100).map {prng.generate_integer( 2**80 - 5, '654321')} ].size.should == 100
+              expect( Set[ *(1..100).map {prng.generate_integer( 2**80 - 5, '654321')} ].size ).to eql 100
             end
 
             it "changes output, but does not include adjustments in changes to state" do
@@ -440,21 +440,21 @@ describe PoolOfEntropy::CorePRNG do
               big = 2 ** 64 - 3
               small = 20
               10.times do
-                prng.generate_integer( small, 'Hello!').should == prng_copy.generate_integer( small, 'Hello!')
-                prng.state.should == prng_copy.state
-                prng.generate_integer( big, 'Hello!').should_not == prng_copy.generate_integer( big, 'Goodbye!')
-                prng.state.should == prng_copy.state
-                prng.generate_integer( big ).should_not == prng_copy.generate_integer( big, 'Goodbye!')
-                prng.state.should == prng_copy.state
-                prng.generate_integer( big, 'Hello!').should_not == prng_copy.generate_integer( big )
-                prng.state.should == prng_copy.state
-                prng.generate_integer( big, 'Hello','Goodbye').should_not == prng_copy.generate_integer( big )
-                prng.state.should == prng_copy.state
+                expect( prng.generate_integer( small, 'Hello!') ).to eql prng_copy.generate_integer( small, 'Hello!')
+                expect( prng.state ).to eql prng_copy.state
+                expect( prng.generate_integer( big, 'Hello!') ).to_not eql prng_copy.generate_integer( big, 'Goodbye!')
+                expect( prng.state ).to eql prng_copy.state
+                expect( prng.generate_integer( big ) ).to_not eql prng_copy.generate_integer( big, 'Goodbye!')
+                expect( prng.state ).to eql prng_copy.state
+                expect( prng.generate_integer( big, 'Hello!') ).to_not eql prng_copy.generate_integer( big )
+                expect( prng.state ).to eql prng_copy.state
+                expect( prng.generate_integer( big, 'Hello','Goodbye') ).to_not eql prng_copy.generate_integer( big )
+                expect( prng.state ).to eql prng_copy.state
                 # Verify that output remains same for next rolls
-                prng.generate_integer( small, 'Foobar','Wibble').should == prng_copy.generate_integer( small, 'Foobar','Wibble')
-                prng.state.should == prng_copy.state
-                prng.generate_integer( big ).should == prng_copy.generate_integer( big )
-                prng.state.should == prng_copy.state
+                expect( prng.generate_integer( small, 'Foobar','Wibble') ).to eql prng_copy.generate_integer( small, 'Foobar','Wibble')
+                expect( prng.state ).to eql prng_copy.state
+                expect( prng.generate_integer( big ) ).to eql prng_copy.generate_integer( big )
+                expect( prng.state ).to eql prng_copy.state
               end
             end
           end
@@ -474,10 +474,10 @@ describe PoolOfEntropy::CorePRNG do
                 :int   => prngs[4].generate_integer( 1_000_000_000 ),
               ]
             end
-            results.sort_by { |h| h[:int] }.should == results.sort_by { |h| h[:hex] }
-            results.sort_by { |h| h[:float] }.should == results.sort_by { |h| h[:hex] }
-            results.sort_by { |h| h[:num] }.should == results.sort_by { |h| h[:bytes] }
-            results.sort_by { |h| h[:float] }.should == results.sort_by { |h| h[:int] }
+            expect( results.sort_by { |h| h[:int] } ).to eql results.sort_by { |h| h[:hex] }
+            expect( results.sort_by { |h| h[:float] } ).to eql results.sort_by { |h| h[:hex] }
+            expect( results.sort_by { |h| h[:num] } ).to eql results.sort_by { |h| h[:bytes] }
+            expect( results.sort_by { |h| h[:float] } ).to eql results.sort_by { |h| h[:int] }
           end
         end
 
@@ -487,7 +487,7 @@ describe PoolOfEntropy::CorePRNG do
     describe "using predictable sequences" do
       it "generates expected hex strings from simple zeroed pool" do
         prng = PoolOfEntropy::CorePRNG.new( 1, "\x0" * 64 )
-        (0..24).map { prng.read_hex }.should == [ "da0cd77eb1c84458ddcc91e36b9dcb35",
+        expect( (0..24).map { prng.read_hex } ).to eql [ "da0cd77eb1c84458ddcc91e36b9dcb35",
           "498ec24d1126440047eed396d836b5e1", "0b90df55c5e7c1513b072367eae4a4ce",
           "f12b5b54b5594e785bbb9a4ac50ccec8", "d506bd4e201a00dc30499bd8e59a30d8",
           "2557893cf995fe43bd00721fce6ab16a", "41ee50244cdd02334bafc3e9d8f564d9",
@@ -504,7 +504,7 @@ describe PoolOfEntropy::CorePRNG do
 
       it "generates expected hex strings from simple zeroed pool and an adjustment" do
         prng = PoolOfEntropy::CorePRNG.new( 1, "\x0" * 64 )
-        (0..24).map { prng.read_hex( 'bananas' ) }.should == [
+        expect( (0..24).map { prng.read_hex( 'bananas' ) } ).to eql [
           "fed9de9a612f4157ebb49582ca557a50", "a7adc2374a4df2ed67846ac09a3b6645",
           "cbdf8bbbe6145751fe14004719915160", "8cd84be95376f72918c305bdea43e36d",
           "9e08e80ff40c942f0cf4d479b5378fa0", "54d80c5330873f9733a0adef0197220f",
@@ -522,7 +522,7 @@ describe PoolOfEntropy::CorePRNG do
 
       it "generates expected hex strings from simple zeroed pool and alternating adjustments" do
         prng = PoolOfEntropy::CorePRNG.new( 1, "\x0" * 64 )
-        (0..24).map { |x| x.odd? ? prng.read_hex( 'bananas', x.to_s ) : prng.read_hex }.should == [
+        expect( (0..24).map { |x| x.odd? ? prng.read_hex( 'bananas', x.to_s ) : prng.read_hex } ).to eql [
           "da0cd77eb1c84458ddcc91e36b9dcb35", "de4b20a0560263090c6fe11ebba6256e",
           "0b90df55c5e7c1513b072367eae4a4ce", "0c92d534160cb268cb3282a9dd3f1efe",
           "d506bd4e201a00dc30499bd8e59a30d8", "089f799236a9cf64f22f1deafbe28214",
