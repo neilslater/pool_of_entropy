@@ -50,7 +50,11 @@ class PoolOfEntropy
   # Cloning creates a deep copy with identical PRNG state and modifiers
   # @return [PoolOfEntropy]
   def clone
-    Marshal.load( Marshal.dump( self ) )
+    copy = super
+    copy.instance_variable_set( :@core_prng, @core_prng.clone )
+    copy.instance_variable_set( :@fixed_modifier, @fixed_modifier.clone ) if @fixed_modifier
+    copy.instance_variable_set( :@next_modifier_queue, @next_modifier_queue.map { |m| m.clone } )
+    copy
   end
 
   # Same functionality as Kernel#rand or Random#rand, but using
