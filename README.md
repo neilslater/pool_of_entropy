@@ -5,6 +5,8 @@ This is a copy of the orignal project, used to test integration between Github a
 You may prefer to fork from the original. The only differences in this version are tests due to
 non-functional Pull Requests.
 
+Testing PR/Jenkins integration #1.
+
 ## Installation
 
 Add this line to your application's Gemfile:
