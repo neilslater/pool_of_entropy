@@ -1,29 +1,11 @@
 # PoolOfEntropy
-[![Gem Version](https://badge.fury.io/rb/pool_of_entropy.png)](http://badge.fury.io/rb/pool_of_entropy)
-[![Build Status](https://travis-ci.org/neilslater/pool_of_entropy.png?branch=master)](http://travis-ci.org/neilslater/pool_of_entropy)
-[![Coverage Status](https://coveralls.io/repos/neilslater/pool_of_entropy/badge.png?branch=master)](https://coveralls.io/r/neilslater/pool_of_entropy?branch=master)
-[![Inline docs](http://inch-ci.org/github/neilslater/pool_of_entropy.png?branch=master)](http://inch-ci.org/github/neilslater/pool_of_entropy)
-[![Code Climate](https://codeclimate.com/github/neilslater/pool_of_entropy.png)](https://codeclimate.com/github/neilslater/pool_of_entropy)
-[![Dependency Status](https://gemnasium.com/neilslater/pool_of_entropy.png)](https://gemnasium.com/neilslater/pool_of_entropy)
 
-PoolOfEntropy is a pseudo random number generator (PRNG) based on secure hashes,
-intended to bring back the feeling of 'personal agency' that some gamers may feel when rolling
-their *own* dice. An instance of the PoolOfEntropy class could be assigned to a player, or
-to each die in a game, and it can be influenced (similar to throwing a die differently), or
-personalised by feeding in arbitrary data (e.g. a picture of the player, a favourite saying).
-It can handle these influences whilst remaining unbiased and fair on each roll.
+This is a copy of the orignal project, used to test integration between Github and Jenkins.
 
-PoolOfEntropy is *probably* secure when used appropriately, and in a very limited sense.
-However, cryptographic security is not its purpose. The core purpose is for playing with
-random number generation and non-standard sources of entropy. The choice of name is
-supposed to reflect this.
+You may prefer to fork from the original. The only differences in this version are tests due to
+non-functional Pull Requests.
 
-If you are looking for a secure PRNG in Ruby, good for generating session codes or
-server-side secrets, use the standard library SecureRandom.
-
-If you think that rolling all your dice on an anonymous server has removed a little bit of soul
-from your game sessions, or if you want to generate unbiased random numbers using input from your
-laptop's microphone or mobile's accellerometer as a source, then PoolOfEntropy might be for you.
+Testing PR/Jenkins integration #1.
 
 ## Installation
 
