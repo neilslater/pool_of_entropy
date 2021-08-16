@@ -1,5 +1,7 @@
-require "pool_of_entropy/version"
-require "pool_of_entropy/core_prng"
+# frozen_string_literal: true
+
+require 'pool_of_entropy/version'
+require 'pool_of_entropy/core_prng'
 
 # This class models a random number generator that can mix user input into
 # the generation mechanism in a few different ways.
@@ -23,25 +25,22 @@ require "pool_of_entropy/core_prng"
 #
 
 class PoolOfEntropy
-
   # Creates a new random number source. All parameters are optional.
   # @param [Hash] options
   # @option options [Integer] :size, number of 512-bit (64 byte) blocks to use as internal state, defaults to 1
   # @option options [Boolean] :blank, if true then initial state is all zeroes, otherwise use SecureRandom
   # @option options [Array<String>] :seeds, if provided these are sent to #add_to_pool during initialize
   # @return [PoolOfEntropy]
-  def initialize options = {}
-    unless options.is_a? Hash
-      raise TypeError, "Expecting an options hash, got #{options.inspect}"
-    end
+  def initialize(options = {})
+    raise TypeError, "Expecting an options hash, got #{options.inspect}" unless options.is_a? Hash
 
-    size = size_from_options( options )
+    size = size_from_options(options)
 
-    initial_state = state_from_options( options, size )
+    initial_state = state_from_options(options, size)
 
-    @core_prng = CorePRNG.new( size, initial_state )
+    @core_prng = CorePRNG.new(size, initial_state)
 
-    seed_from_options( options )
+    seed_from_options(options)
 
     @next_modifier_queue = []
     @fixed_modifier = nil
@@ -51,9 +50,9 @@ class PoolOfEntropy
   # @return [PoolOfEntropy]
   def clone
     copy = super
-    copy.instance_variable_set( :@core_prng, @core_prng.clone )
-    copy.instance_variable_set( :@fixed_modifier, @fixed_modifier.clone ) if @fixed_modifier
-    copy.instance_variable_set( :@next_modifier_queue, @next_modifier_queue.map { |m| m.clone } )
+    copy.instance_variable_set(:@core_prng, @core_prng.clone)
+    copy.instance_variable_set(:@fixed_modifier, @fixed_modifier.clone) if @fixed_modifier
+    copy.instance_variable_set(:@next_modifier_queue, @next_modifier_queue.map(&:clone))
     copy
   end
 
@@ -62,18 +61,19 @@ class PoolOfEntropy
   # two modifiers that are in effect.
   # @param [Integer,Range] max if 0 then will return a Float
   # @return [Float,Fixnum,Bignum] type depends on value of max
-  def rand max = 0
+  def rand(max = 0)
     if max.is_a? Range
       bottom = max.first
       top = max.last
-      return( nil ) if top < bottom
-      return bottom + generate_integer( ( top - bottom + 1 ) )
+      return(nil) if top < bottom
+
+      bottom + generate_integer((top - bottom + 1))
     else
       effective_max = max.to_i.abs
-      if effective_max == 0
-        return generate_float
+      if effective_max.zero?
+        generate_float
       else
-        return generate_integer( effective_max )
+        generate_integer(effective_max)
       end
     end
   end
@@ -85,13 +85,13 @@ class PoolOfEntropy
   # affect the internal state of the data pool used by the generator.
   # @param [Array<String>] modifiers
   # @return [PoolOfEntropy] self
-  def modify_next *modifiers
+  def modify_next(*modifiers)
     modifiers.each do |modifier|
-      if modifier.nil?
-        @next_modifier_queue << nil
-      else
-        @next_modifier_queue << Digest::SHA512.digest( modifier.to_s )
-      end
+      @next_modifier_queue << if modifier.nil?
+                                nil
+                              else
+                                Digest::SHA512.digest(modifier.to_s)
+                              end
     end
     self
   end
@@ -104,11 +104,9 @@ class PoolOfEntropy
   # affect the internal state of the data pool used by the generator.
   # @param [String,nil] modifier
   # @return [PoolOfEntropy] self
-  def modify_all modifier
+  def modify_all(modifier)
     @fixed_modifier = modifier
-    unless @fixed_modifier.nil?
-      @fixed_modifier = Digest::SHA512.digest( @fixed_modifier.to_s )
-    end
+    @fixed_modifier = Digest::SHA512.digest(@fixed_modifier.to_s) unless @fixed_modifier.nil?
     self
   end
 
@@ -117,8 +115,8 @@ class PoolOfEntropy
   # from #rand() and cannot be undone.
   # @param [String] data
   # @return [PoolOfEntropy] self
-  def add_to_pool data
-    @core_prng.update( data )
+  def add_to_pool(data)
+    @core_prng.update(data)
     self
   end
 
@@ -133,43 +131,42 @@ class PoolOfEntropy
   private
 
   def use_adjustments
-    [ @fixed_modifier, @next_modifier_queue.shift ].compact
+    [@fixed_modifier, @next_modifier_queue.shift].compact
   end
 
   def generate_float
-    @core_prng.read_float( *use_adjustments )
+    @core_prng.read_float(*use_adjustments)
   end
 
-  def generate_integer max
-    @core_prng.generate_integer( max, *use_adjustments )
+  def generate_integer(max)
+    @core_prng.generate_integer(max, *use_adjustments)
   end
 
-  def state_from_options( options, size )
+  def state_from_options(options, size)
     if options[:blank]
       "\x0" * size * 64
     else
-      SecureRandom.random_bytes( size * 64 )
+      SecureRandom.random_bytes(size * 64)
     end
   end
 
-  def size_from_options( options )
+  def size_from_options(options)
     size = 1
     if options[:size]
-      size = Integer( options[:size] )
-      if size < 1 || size > 256
-        raise ArgumentError, "Size of pool must be in Range 1..256, got #{size}"
-      end
+      size = Integer(options[:size])
+      raise ArgumentError, "Size of pool must be in Range 1..256, got #{size}" if size < 1 || size > 256
     end
     size
   end
 
-  def seed_from_options( options )
+  def seed_from_options(options)
     if options[:seeds]
       unless options[:seeds].is_a? Array
         raise TypeError, "Expected value for :seeds to be an Array, got #{options[:seeds].inspect}"
       end
+
       options[:seeds].each do |seed|
-        add_to_pool( seed )
+        add_to_pool(seed)
       end
     end
   end
