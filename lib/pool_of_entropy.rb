@@ -22,8 +22,6 @@ require 'pool_of_entropy/core_prng'
 #    # E.g. => 12
 #    sleep 5
 #  end
-#
-
 class PoolOfEntropy
   # Creates a new random number source. All parameters are optional.
   # @param [Hash] options
@@ -62,19 +60,13 @@ class PoolOfEntropy
   # @param [Integer,Range] max if 0 then will return a Float
   # @return [Float,Fixnum,Bignum] type depends on value of max
   def rand(max = 0)
-    if max.is_a? Range
-      bottom = max.first
-      top = max.last
-      return(nil) if top < bottom
+    return rand_from_range(max) if max.is_a? Range
 
-      bottom + generate_integer((top - bottom + 1))
+    effective_max = max.to_i.abs
+    if effective_max.zero?
+      generate_float
     else
-      effective_max = max.to_i.abs
-      if effective_max.zero?
-        generate_float
-      else
-        generate_integer(effective_max)
-      end
+      generate_integer(effective_max)
     end
   end
 
@@ -130,6 +122,14 @@ class PoolOfEntropy
 
   private
 
+  def rand_from_range(range)
+    bottom = range.first
+    top = range.last
+    return nil if top < bottom
+
+    bottom + generate_integer(top - bottom + 1)
+  end
+
   def use_adjustments
     [@fixed_modifier, @next_modifier_queue.shift].compact
   end
@@ -160,14 +160,13 @@ class PoolOfEntropy
   end
 
   def seed_from_options(options)
-    if options[:seeds]
-      unless options[:seeds].is_a? Array
-        raise TypeError, "Expected value for :seeds to be an Array, got #{options[:seeds].inspect}"
-      end
+    return unless options[:seeds]
+    unless options[:seeds].is_a? Array
+      raise TypeError, "Expected value for :seeds to be an Array, got #{options[:seeds].inspect}"
+    end
 
-      options[:seeds].each do |seed|
-        add_to_pool(seed)
-      end
+    options[:seeds].each do |seed|
+      add_to_pool(seed)
     end
   end
 end

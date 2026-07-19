@@ -74,7 +74,8 @@ class PoolOfEntropy
     end
 
     # Statistically flat distribution of 128 bits (16 bytes)
-    # @param [Array<String>] adjustments mixed in using SHA-512, so that they affect return value, but not internal state
+    # @param [Array<String>] adjustments mixed in using SHA-512, so that they affect
+    #   the return value, but not internal state
     # @return [String] 16 characters in ASCII-8BIT encoding
     def read_bytes(*adjustments)
       raw_digest = Digest::SHA512.digest(@state)
@@ -86,14 +87,16 @@ class PoolOfEntropy
     end
 
     # Statistically flat distribution of 32 hex digits
-    # @param [Array<String>] adjustments mixed in using SHA-512, so that they affect return value, but not internal state
+    # @param [Array<String>] adjustments mixed in using SHA-512, so that they affect
+    #   the return value, but not internal state
     # @return [String] 32 hex digits
     def read_hex(*adjustments)
       read_bytes(*adjustments).unpack1('H*')
     end
 
     # Statistically flat distribution from range 0...2**128
-    # @param [Array<String>] adjustments mixed in using SHA-512, so that they affect return value, but not internal state
+    # @param [Array<String>] adjustments mixed in using SHA-512, so that they affect
+    #   the return value, but not internal state
     # @return [Bignum,Fixnum] between 0 and 0xffffffffffffffffffffffffffffffff
     def read_bignum(*adjustments)
       nums = read_bytes(*adjustments).unpack('Q>*')
@@ -101,11 +104,12 @@ class PoolOfEntropy
     end
 
     # Statistically flat distribution from interval 0.0...1.0, with 53-bit precision
-    # @param [Array<String>] adjustments mixed in using SHA-512, so that they affect return value, but not internal state
+    # @param [Array<String>] adjustments mixed in using SHA-512, so that they affect
+    #   the return value, but not internal state
     # @return [Float] between 0.0 and 0.9999999999999999
     def read_float(*adjustments)
       num = read_bytes(*adjustments).unpack1('Q>*') >> 11
-      num.to_f / 2**53
+      num.to_f / (2**53)
     end
 
     # Statistically flat distribution from range (0...top).
@@ -113,7 +117,8 @@ class PoolOfEntropy
     # can generate an unbiased distribution of Bignums up to roughly half the maximum bit size
     # allowed by Ruby (i.e. much larger than 2**128 generated in a single read)
     # @param [Fixnum,Bignum] top upper bound of distribution, not inclusive
-    # @param [Array<String>] adjustments mixed in using SHA-512, so that they affect return value, but not internal state
+    # @param [Array<String>] adjustments mixed in using SHA-512, so that they affect
+    #   the return value, but not internal state
     # @return [Fixnum,Bignum] between 0 and top-1 inclusive
     def generate_integer(top, *adjustments)
       power = 1
@@ -122,7 +127,7 @@ class PoolOfEntropy
 
       loop do
         words = read_bytes(*adjustments).unpack('L>*') if words.empty?
-        sum = 2**32 * sum + words.shift
+        sum = ((2**32) * sum) + words.shift
         power *= 2**32
         lower_bound = sum * top / power
         break lower_bound if lower_bound == ((sum + 1) * top) / power
@@ -143,8 +148,8 @@ class PoolOfEntropy
       folded_32bits.pack('L>*')
     end
 
-    def validate_size(i)
-      size = Integer(i)
+    def validate_size(value)
+      size = Integer(value)
       raise ArgumentError, "Size of pool must be in Range 1..256, got #{size}" if size < 1 || size > 256
 
       size
