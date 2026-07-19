@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require 'coveralls'
+require 'simplecov'
 require 'set'
 
-Coveralls.wear!
+SimpleCov.start
 
 require 'pool_of_entropy'
