@@ -62,6 +62,12 @@ describe PoolOfEntropy do
     end
   end
 
+  describe '#rand' do
+    it 'returns nil for a descending Range' do
+      expect(described_class.new.rand(10..5)).to be_nil
+    end
+  end
+
   pool_types = [
     [
       'default instance',
