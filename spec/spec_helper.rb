@@ -4,6 +4,7 @@ require 'simplecov'
 
 SimpleCov.start do
   enable_coverage :branch
+  minimum_coverage line: 95, branch: 95
 end
 
 require 'pool_of_entropy'

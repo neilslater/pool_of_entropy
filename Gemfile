@@ -5,6 +5,7 @@ source 'https://rubygems.org'
 gemspec
 
 gem 'bundler', '>= 2.5', '< 5'
+gem 'bundler-audit', '~> 0.9'
 gem 'rake', '~> 13.2'
 gem 'rspec', '~> 3.13'
 gem 'rubocop', '~> 1.88'
