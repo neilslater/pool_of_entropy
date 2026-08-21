@@ -6,10 +6,11 @@ gemspec
 
 gem 'bundler', '>= 2.5', '< 5'
 gem 'bundler-audit', '~> 0.9'
+gem 'ncs_rubocop_conf',
+    github: 'neilslater/ncs_rubocop_conf',
+    tag: 'v0.2.0',
+    require: false
 gem 'rake', '~> 13.2'
 gem 'rspec', '~> 3.13'
-gem 'rubocop', '~> 1.88'
-gem 'rubocop-rake', '~> 0.7'
-gem 'rubocop-rspec', '~> 3.10'
 gem 'simplecov', '~> 1.0'
 gem 'yard', '~> 0.9.37'

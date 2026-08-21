@@ -22,6 +22,8 @@ laptop's microphone or mobile's accellerometer as a source, then PoolOfEntropy m
 
 ## Installation
 
+PoolOfEntropy requires Ruby 3.3 or newer.
+
 Add this line to your application's Gemfile:
 
     gem 'pool_of_entropy'
