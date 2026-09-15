@@ -57,6 +57,10 @@ statistically. Larger pool sizes (up to 256) will calculate a
 little slower, but can be used to buffer more entropy from
 the #add_to_pool method.
 
+Sizes are converted with Ruby's `Integer` conversion and then checked against
+1..256 before allocating state. For example, `'2'` selects two blocks and `1.5`
+selects one. An omitted, nil, or false `:size` uses the default of one block.
+
 Setting :blank to true starts the pool with the entire pool
 zero, so that repeatedly using the generator in exactly the
 same way will return the same values.
@@ -144,6 +148,34 @@ If you care
 about your own source of randomness being more "important" than
 the initial state of the PRNG or its deterministic progression,
 then make use of the modifiers and/or add data to the pool frequently.
+
+### Byte inputs and conversion failures
+
+Seeds, `add_to_pool`, and modifiers use the exact bytes of their strings.
+Frozen strings, non-ASCII text in any encoding, NUL bytes, and invalid encoded
+byte sequences are accepted. Strings with identical bytes give identical results
+regardless of their encoding labels. No transcoding or Unicode normalization is
+performed, and caller strings keep their contents, encoding, and frozen status.
+Other objects are converted with `to_s`.
+
+`add_to_pool(nil)` mixes an empty string and still advances the generator.
+`modify_all(nil)` clears the fixed modifier, while `modify_next(nil)` queues one
+turn without a next modifier. If input conversion or validation fails,
+`add_to_pool` leaves state unchanged, `modify_all` keeps its existing modifier,
+and `modify_next` appends none of the submitted batch. This guarantee covers
+input failures; it does not promise rollback for arbitrary process or resource
+failures.
+
+For direct `PoolOfEntropy::CorePRNG` construction, explicit state must be a
+String of exactly `64 * Integer(size)` bytes, and may be frozen. Omit the state
+argument to use SecureRandom; explicit nil is invalid. The block index is
+converted with `Integer` and reduced modulo the normalized size before default
+entropy is requested. Both size and index must pass validation first.
+
+Direct core read adjustments accept only Strings or nil. Nil adjustments are
+ignored, and every adjustment is validated and copied as binary bytes before
+the read changes state. Invalid adjustment input leaves the next output
+unchanged, even when the invalid item follows valid adjustments.
 
 ## More information
 
