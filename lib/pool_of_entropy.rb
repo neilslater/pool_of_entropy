@@ -25,9 +25,10 @@ require 'pool_of_entropy/core_prng'
 class PoolOfEntropy
   # Creates a new random number source. All parameters are optional.
   # @param [Hash] options
-  # @option options [Integer] :size, number of 512-bit (64 byte) blocks to use as internal state, defaults to 1
+  # @option options [#to_int,String] :size number of 64-byte blocks, converted with Integer and validated
+  #   in 1..256 before allocation; defaults to 1 (also for nil or false)
   # @option options [Boolean] :blank, if true then initial state is all zeroes, otherwise use SecureRandom
-  # @option options [Array<String>] :seeds, if provided these are sent to #add_to_pool during initialize
+  # @option options [Array<#to_s,nil>] :seeds, if provided these are sent to #add_to_pool during initialize
   # @return [PoolOfEntropy]
   def initialize(options = {})
     raise TypeError, "Expecting an options hash, got #{options.inspect}" unless options.is_a? Hash
@@ -75,16 +76,14 @@ class PoolOfEntropy
   # modifiers and the "all" modifier are combined if both are in effect.
   # Modifiers change the end result of a call to #rand(), but do *not*
   # affect the internal state of the data pool used by the generator.
-  # @param [Array<String>] modifiers
+  # Non-nil inputs are converted with to_s and hashed as bytes without transcoding.
+  # If any conversion or validation fails, the entire queue is unchanged.
+  # @param [Array<#to_s,nil>] modifiers Nil inserts one unmodified turn into the queue
   # @return [PoolOfEntropy] self
+  # @raise [TypeError] if a non-nil modifier's to_s does not return a String
   def modify_next(*modifiers)
-    modifiers.each do |modifier|
-      @next_modifier_queue << if modifier.nil?
-                                nil
-                              else
-                                Digest::SHA512.digest(modifier.to_s)
-                              end
-    end
+    digests = modifiers.map { |modifier| modifier_digest(modifier) }
+    @next_modifier_queue.concat(digests)
     self
   end
 
@@ -94,19 +93,24 @@ class PoolOfEntropy
   # combined if both are in effect.  Modifiers change the end result
   # of a call to #rand(), but do *not*
   # affect the internal state of the data pool used by the generator.
-  # @param [String,nil] modifier
+  # Non-nil input is converted with to_s and hashed as bytes without transcoding.
+  # Conversion or validation failure leaves the existing modifier unchanged.
+  # @param [#to_s,nil] modifier Nil clears the fixed modifier
   # @return [PoolOfEntropy] self
+  # @raise [TypeError] if a non-nil modifier's to_s does not return a String
   def modify_all(modifier)
-    @fixed_modifier = modifier
-    @fixed_modifier = Digest::SHA512.digest(@fixed_modifier.to_s) unless @fixed_modifier.nil?
+    @fixed_modifier = modifier_digest(modifier)
     self
   end
 
   # Changes the internal state of the data pool used by the generator,
   # by "mixing in" user-supplied data. This affects all future values
   # from #rand() and cannot be undone.
-  # @param [String] data
+  # Input is converted with to_s and mixed as bytes without transcoding or changing
+  # the caller's string. Conversion and validation finish before changing state.
+  # @param [#to_s,nil] data Nil is equivalent to an empty string and still changes state
   # @return [PoolOfEntropy] self
+  # @raise [TypeError] if data.to_s does not return a String
   def add_to_pool(data)
     @core_prng.update(data)
     self
@@ -121,6 +125,10 @@ class PoolOfEntropy
   end
 
   private
+
+  def modifier_digest(modifier)
+    Digest::SHA512.digest(modifier.to_s) unless modifier.nil?
+  end
 
   def rand_from_range(range)
     bottom = range.first
